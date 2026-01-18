@@ -93,9 +93,15 @@ export type MainTabParamList = {
   Routes: undefined;
   Track: undefined;
   Profile: undefined;
+  Settings: undefined;
 };
 
 export type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
+};
+
+export type ProfileStackParamList = {
+  ProfileMain: undefined;
+  UserSettings: undefined;
 };

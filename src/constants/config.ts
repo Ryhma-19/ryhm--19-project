@@ -1,6 +1,8 @@
 export const CONFIG = {
   // API endpoints
   FMI_API_BASE_URL: 'https://opendata.fmi.fi/wfs',
+
+  DEV_AUTH_BYPASS: __DEV__,
   
   // Map configuration
   MAP: {

@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { COLORS } from '../constants/theme';
 import { MainTabParamList } from '../types';
+import { ProfileStackParamList } from '../types';
 
 // Import screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -15,9 +16,11 @@ import HomeScreen from '../screens/home/HomeScreen';
 import RoutesScreen from '../screens/routes/RoutesScreen';
 import TrackingScreen from '../screens/tracking/TrackingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import UserSettingsScreen from '../screens/profile/UserSettingsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const ProfileStack = createStackNavigator<ProfileStackParamList>();
 
 // Auth stack (login, signup)
 function AuthNavigator() {
@@ -26,6 +29,23 @@ function AuthNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
     </Stack.Navigator>
+  );
+}
+
+function ProfileNavigator() {
+  return (
+    <ProfileStack.Navigator>
+      <ProfileStack.Screen
+        name="ProfileMain"
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <ProfileStack.Screen
+        name="UserSettings"
+        component={UserSettingsScreen}
+        options={{ title: 'Settings' }}
+      />
+    </ProfileStack.Navigator>
   );
 }
 
@@ -59,7 +79,7 @@ function MainNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Routes" component={RoutesScreen} />
       <Tab.Screen name="Track" component={TrackingScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile" component={ProfileNavigator} />
     </Tab.Navigator>
   );
 }
