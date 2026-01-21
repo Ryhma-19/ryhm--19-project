@@ -1,35 +1,77 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-
 import { useAuth } from '../contexts/AuthContext';
-import { COLORS } from '../constants/theme';
-import { MainTabParamList } from '../types';
-import { ProfileStackParamList } from '../types';
+import { COLORS, TYPOGRAPHY } from '../constants/theme';
+import { RoutesStackParamList, AuthStackParamList, MainTabParamList } from '../types/navigation';
 
-// Import screens
+// Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
+
+// Main Screens
 import HomeScreen from '../screens/home/HomeScreen';
 import RoutesScreen from '../screens/routes/RoutesScreen';
+import RoutePlanningScreen from '../screens/routes/RoutePlanningScreen';
 import TrackingScreen from '../screens/tracking/TrackingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import UserSettingsScreen from '../screens/profile/UserSettingsScreen';
 import PasswordUpdateScreen from '../screens/profile/PasswordUpdateScreen';
+import { ProfileStackParamList } from '../types';
 
-const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const ProfileStack = createStackNavigator<ProfileStackParamList>();
+const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const RoutesStack = createNativeStackNavigator<RoutesStackParamList>();
 
-// Auth stack (login, signup)
+// Routes Stack Navigator
+function RoutesNavigator() {
+  return (
+    <RoutesStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontFamily: TYPOGRAPHY.fonts.semiBold,
+          fontSize: 18,
+        },
+      }}
+    >
+      <RoutesStack.Screen
+        name="RoutesList"
+        component={RoutesScreen}
+        options={{
+          title: 'My Routes',
+        }}
+      />
+      <RoutesStack.Screen
+        name="RoutePlanning"
+        component={RoutePlanningScreen}
+        options={({ route }) => ({
+          title: route.params?.editRoute ? 'Edit Route' : 'Create Route',
+          headerBackTitle: 'Routes',
+        })}
+      />
+      {/* Add RouteDetailsScreen here */}
+    </RoutesStack.Navigator>
+  );
+}
+
+// Auth Stack Navigator
 function AuthNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignupScreen} />
-    </Stack.Navigator>
+    <AuthStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="Signup" component={SignupScreen} />
+    </AuthStack.Navigator>
   );
 }
 
@@ -55,15 +97,13 @@ function ProfileNavigator() {
   );
 }
 
-type IconName = keyof typeof Ionicons.glyphMap;
-
-// Main app tabs
+// Main Tab Navigator
 function MainNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: IconName = 'home';
+          let iconName: keyof typeof Ionicons.glyphMap;
 
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
@@ -73,31 +113,70 @@ function MainNavigator() {
             iconName = focused ? 'play-circle' : 'play-circle-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
+          } else {
+            iconName = 'help-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.text.secondary,
-        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: COLORS.surface,
+          borderTopColor: COLORS.border,
+          paddingBottom: 5,
+          height: 60,
+        },
+        tabBarLabelStyle: {
+          fontFamily: TYPOGRAPHY.fonts.medium,
+          fontSize: 12,
+        },
+        headerStyle: {
+          backgroundColor: COLORS.primary,
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontFamily: TYPOGRAPHY.fonts.semiBold,
+          fontSize: 18,
+        },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Routes" component={RoutesScreen} />
-      <Tab.Screen name="Track" component={TrackingScreen} />
-      <Tab.Screen name="Profile" component={ProfileNavigator} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: 'Home',
+        }}
+      />
+      <Tab.Screen
+        name="Routes"
+        component={RoutesNavigator}
+        options={{
+          headerShown: false,
+          title: 'Routes',
+        }}
+      />
+      <Tab.Screen
+        name="Track"
+        component={TrackingScreen}
+        options={{
+          title: 'Track',
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileNavigator}
+        options={{
+          title: 'Profile',
+        }}
+      />
     </Tab.Navigator>
   );
 }
 
-// Root navi
+// Root App Navigator
 export default function AppNavigator() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    // Show loading screen while checking auth
-    return null;
-  }
+  const { user } = useAuth();
 
   return (
     <NavigationContainer>
