@@ -1,9 +1,9 @@
 export const COLORS = {
-  primary: '#4A90E2',      // Main in blue
-  secondary: '#50C878',    // Success in green
-  accent: '#FF6B6B',       // Alerts in red
-  background: '#F5F5F5',   // App background
-  surface: '#FFFFFF',      // Card backgrounds
+  primary: '#4A90E2',      
+  secondary: '#50C878',    
+  accent: '#FF6B6B',       
+  background: '#F5F5F5',   
+  surface: '#FFFFFF',      
   text: {
     primary: '#2C3E50',
     secondary: '#7F8C8D',
@@ -24,6 +24,12 @@ export const SPACING = {
 };
 
 export const TYPOGRAPHY = {
+  fonts: {
+    regular: 'System',
+    medium: 'System',
+    semiBold: 'System',
+    bold: 'System',
+  },
   sizes: {
     xs: 12,
     sm: 14,

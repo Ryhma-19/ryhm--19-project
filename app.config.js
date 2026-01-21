@@ -1,4 +1,6 @@
-{
+import 'dotenv/config';
+
+export default {
   "expo": {
     "name": "wellness",
     "slug": "wellness",
@@ -16,6 +18,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourname.wellness",
+      "config": {
+        "googleMapsApiKey": process.env.GOOGLE_MAPS_API_KEY
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need your location to track your workouts and show nearby routes.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "We need your location to track your workouts in the background.",
@@ -28,6 +33,11 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.yourname.wellness",
+      "config": {
+        "googleMaps": {
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY
+        }
+      },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -39,7 +49,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Wellness Tracker to use your location to track workouts."
+          "locationAlwaysAndWhenInUsePermission": "Allow Wellness to use your location to track workouts."
         }
       ],
       "expo-font"
