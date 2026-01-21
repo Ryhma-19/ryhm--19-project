@@ -104,4 +104,5 @@ export type AuthStackParamList = {
 export type ProfileStackParamList = {
   ProfileMain: undefined;
   UserSettings: undefined;
+  PasswordUpdate: undefined;
 };

@@ -17,6 +17,7 @@ import RoutesScreen from '../screens/routes/RoutesScreen';
 import TrackingScreen from '../screens/tracking/TrackingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import UserSettingsScreen from '../screens/profile/UserSettingsScreen';
+import PasswordUpdateScreen from '../screens/profile/PasswordUpdateScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -44,6 +45,11 @@ function ProfileNavigator() {
         name="UserSettings"
         component={UserSettingsScreen}
         options={{ title: 'Settings' }}
+      />
+      <ProfileStack.Screen
+        name="PasswordUpdate"
+        component={PasswordUpdateScreen}
+        options={{ title: 'Change Password' }}
       />
     </ProfileStack.Navigator>
   );

@@ -1,14 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Pressable, TextInput, Switch, Button } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Alert } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { getAuth, updateProfile } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase/config';
 
 export default function UserSettingsScreen({ navigation }: any) {
-  const { user } = useAuth();
+  const auth = getAuth();
+  const user = auth.currentUser;
   const [notifications, setNotifactions] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setLoading(true)
+    if (!user) {
+        Alert.alert("No user detected")
+        return
+    }
+
+    try {
+        if (displayName !== user?.displayName) {
+            updateProfile(user, {displayName})
+
+            const userRef = doc(db, 'users', user.uid);
+
+            await updateDoc(userRef, {
+                displayName: displayName
+            });
+            console.log("Display name updated")
+        }
+
+        if (email !== user?.email) {
+            const userRef = doc(db, 'users', user.uid);
+
+            await updateDoc(userRef, {
+                email: email
+            });
+            console.log("Email address updated")
+        }
+    } catch (error: any) {
+    console.error(error.message);
+    } finally {
+    setLoading(false);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -25,7 +62,17 @@ export default function UserSettingsScreen({ navigation }: any) {
         value={email}
         onChangeText={setEmail}
         style={styles.input}
+        autoCapitalize="none"
+        keyboardType="email-address"
       />
+      <TouchableOpacity
+        style={styles.passwordButton}
+        onPress={() => navigation.navigate("PasswordUpdate")}
+        >
+        <Text style={styles.subtitle}>
+            Change password
+        </Text>
+      </TouchableOpacity>
       <Text style={styles.subtitle}>Turn on notifications?</Text>
       <Switch
         value={notifications}
@@ -34,7 +81,7 @@ export default function UserSettingsScreen({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.goBack()}
+        onPress={handleSave}
         disabled={loading}
         >
         <Text style={styles.buttonText}>
@@ -80,5 +127,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: TYPOGRAPHY.weights.semibold,
+  },
+  passwordButton: {
+    borderRadius: 8,
+    padding: SPACING.md,
+    alignItems: 'center',
+    marginTop: SPACING.md,
   },
 });
