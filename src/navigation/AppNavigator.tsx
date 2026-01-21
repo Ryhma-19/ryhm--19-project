@@ -15,6 +15,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import RoutesScreen from '../screens/routes/RoutesScreen';
 import TrackingScreen from '../screens/tracking/TrackingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
+import StepsScreen  from  '../screens/steps/StepsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -45,6 +46,8 @@ function MainNavigator() {
             iconName = focused ? 'map' : 'map-outline';
           } else if (route.name === 'Track') {
             iconName = focused ? 'play-circle' : 'play-circle-outline';
+          } else if (route.name === 'Steps') {
+            iconName = focused ? 'walk' : 'walk-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -59,6 +62,7 @@ function MainNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Routes" component={RoutesScreen} />
       <Tab.Screen name="Track" component={TrackingScreen} />
+      <Tab.Screen name="Steps" component={StepsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

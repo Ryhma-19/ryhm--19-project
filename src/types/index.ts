@@ -92,6 +92,7 @@ export type MainTabParamList = {
   Home: undefined;
   Routes: undefined;
   Track: undefined;
+  Steps: undefined;
   Profile: undefined;
 };
 
@@ -99,3 +100,27 @@ export type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
 };
+
+// steps
+export interface DailySteps {
+  date: string;      
+  steps: number;
+  updatedAt: Date;
+}
+
+export interface StepsGoal {
+  dailyGoal: number; // steps per day
+  lastUpdated: Date;
+}
+
+export interface WeeklyStepsData {
+  week: string; // 'YYYY-Www' format
+  days: DailySteps[];
+  total: number;
+}
+
+export interface MonthlyStepsData {
+  month: string; // 'YYYY-MM' format
+  weeks: WeeklyStepsData[];
+  total: number;
+}
