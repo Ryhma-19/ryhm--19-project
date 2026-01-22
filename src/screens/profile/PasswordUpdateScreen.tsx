@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Pressable, TextInput, Switch, Button, Alert } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 import {
-  getAuth,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
 } from "firebase/auth";
+import { auth } from '../../services/firebase/config';
+
 
 export default function PasswordUpdateScreen({ navigation }: any) {
-  const auth = getAuth();
   const user = auth.currentUser;
   const [loading, setLoading] = useState(false);
   const [oldPassword, setOldPassword] = useState('');

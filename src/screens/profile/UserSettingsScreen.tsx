@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Alert } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
-import { getAuth, updateProfile } from 'firebase/auth';
+import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../services/firebase/config';
+import { auth, db } from '../../services/firebase/config';
 
 export default function UserSettingsScreen({ navigation }: any) {
-  const auth = getAuth();
   const user = auth.currentUser;
   const [notifications, setNotifactions] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
