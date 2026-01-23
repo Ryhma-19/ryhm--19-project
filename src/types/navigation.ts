@@ -14,6 +14,7 @@ export type RoutesStackParamList = {
 export type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
+  PasswordReset: undefined;
 };
 
 export type MainTabParamList = {

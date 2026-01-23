@@ -10,6 +10,7 @@ import { RoutesStackParamList, AuthStackParamList, MainTabParamList } from '../t
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
+import PasswordResetScreen from '../screens/auth/PasswordResetScreen';
 
 // Main Screens
 import HomeScreen from '../screens/home/HomeScreen';
@@ -73,6 +74,8 @@ function AuthNavigator() {
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Signup" component={SignupScreen} />
+      <AuthStack.Screen name="PasswordReset" component={PasswordResetScreen} 
+      options={{headerShown: true, headerTitle: ''}}/>
     </AuthStack.Navigator>
   );
 }

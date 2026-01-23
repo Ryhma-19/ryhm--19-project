@@ -3,7 +3,8 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   User as FirebaseUser,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './config';
@@ -102,6 +103,15 @@ export class AuthService {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
+    }
+  }
+
+  static async resetUserPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(auth, email)
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      throw new Error('Failed to send password reset to email');
     }
   }
 }

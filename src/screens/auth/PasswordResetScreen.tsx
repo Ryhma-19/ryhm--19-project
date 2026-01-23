@@ -9,28 +9,27 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { AuthService } from '../../services/firebase/auth.service';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 
-export default function LoginScreen({ navigation }: any) {
+export default function PasswordResetScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handlePasswordReset = async () => {
+    if (!email) {
+      Alert.alert('Error', 'Please provide an email');
       return;
     }
 
     setLoading(true);
     try {
-      await signIn(email, password);
+      await AuthService.resetUserPassword(email)
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     } finally {
       setLoading(false);
+      navigation.goBack()
     }
   };
 
@@ -40,8 +39,8 @@ export default function LoginScreen({ navigation }: any) {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
+        <Text style={styles.subtitle}>Please insert your email</Text>
+        <Text style={styles.subtitle}>An email will be sent to you to change your password</Text>
 
         <TextInput
           style={styles.input}
@@ -52,39 +51,13 @@ export default function LoginScreen({ navigation }: any) {
           keyboardType="email-address"
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
+          onPress={handlePasswordReset}
           disabled={loading}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={() => navigation.navigate('PasswordReset')}
-        >
-          <Text style={styles.linkText}>
-            Forgot your password? <Text style={styles.linkTextBold}>Reset your password</Text>
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.linkButton}
-          onPress={() => navigation.navigate('Signup')}
-        >
-          <Text style={styles.linkText}>
-            Don't have an account? <Text style={styles.linkTextBold}>Sign up</Text>
+            Change password
           </Text>
         </TouchableOpacity>
       </View>
@@ -96,6 +69,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+    marginBottom: '50%',
   },
   content: {
     flex: 1,
