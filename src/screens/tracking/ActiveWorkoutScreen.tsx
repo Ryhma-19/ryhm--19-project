@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useWorkoutTracking } from '../../hooks/useWorkoutTracking';
+import { useWorkoutTrackingWithPedometer} from '../../hooks/useWorkoutTrackingWithPedometer';
 import { formatDuration, formatDistance, formatPace } from '../../utils/workoutUtils';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 import { WorkoutType } from '../../types/workout';
@@ -38,7 +38,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     pauseTracking,
     resumeTracking,
     stopTracking,
-  } = useWorkoutTracking();
+  } = useWorkoutTrackingWithPedometer();
 
   const [isStarted, setIsStarted] = useState(false);
 
@@ -82,8 +82,15 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     if (stats.distance < 100) {
       Alert.alert(
         'Workout Too Short',
-        'Please complete at least 100 meters before finishing.',
-        [{ text: 'OK' }]
+        `You need at least 100m to save a workout.\nCurrent distance: ${Math.round(stats.distance)}m`,
+        [
+          { text: 'Continue Workout', style: 'default' },
+          {
+            text: 'Cancel Without Saving',
+            style: 'destructive',
+            onPress: handleCancelWorkout,
+          },
+        ]
       );
       return;
     }
@@ -92,7 +99,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
       'Finish Workout?',
       'Are you ready to complete your workout?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Not yet', style: 'cancel' },
         {
           text: 'Finish',
           style: 'default',
@@ -118,6 +125,53 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     );
   };
 
+  // Handle cancelling workout
+  const handleCancelWorkout = () => {
+    const distanceKm = (stats.distance / 1000).toFixed(2);
+    const canSave = stats.distance >= 100;
+
+    if (canSave) {
+      // Workout is within minimum distance requirement, ask to save or discard
+      Alert.alert(
+        'Cancel Workout?',
+        `You've completed ${distanceKm} km. Do you want to save this workout or discard it?`,
+        [
+          { text: 'Keep Going', style: 'cancel' },
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: async () => {
+              await stopTracking();
+              navigation.navigate('TrackingHome');
+            },
+          },
+          {
+            text: 'Save & Finish',
+            style: 'default',
+            onPress: handleFinishWorkout,
+          },
+        ]
+      );
+    } else {
+      // Workout too short so confirm discarding instead
+      Alert.alert(
+        'Cancel Workout?',
+        `This workout is too short to save (${Math.round(stats.distance)}m).\nExit without recording?`,
+        [
+          { text: 'Keep Going', style: 'cancel' },
+          {
+            text: 'Yes, Cancel',
+            style: 'destructive',
+            onPress: async () => {
+              await stopTracking();
+              navigation.navigate('TrackingHome');
+            },
+          },
+        ]
+      );
+    }
+  };
+
   // Prevent accidental back navigation
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
@@ -128,22 +182,8 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
       // Prevent default navigation
       e.preventDefault();
 
-      // Show confirmation
-      Alert.alert(
-        'Discard Workout?',
-        'Are you sure you want to discard this workout?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Discard',
-            style: 'destructive',
-            onPress: async () => {
-              await stopTracking();
-              navigation.dispatch(e.data.action);
-            },
-          },
-        ]
-      );
+      // Show cancel confirmation
+      handleCancelWorkout();
     });
 
     return unsubscribe;
@@ -244,15 +284,26 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
           </Text>
         </TouchableOpacity>
 
-        {/* Finish Button */}
-        <TouchableOpacity
-          style={styles.finishButton}
-          onPress={handleFinishWorkout}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="checkmark-circle" size={24} color={COLORS.primary} />
-          <Text style={styles.finishButtonText}>Finish Workout</Text>
-        </TouchableOpacity>
+        {/* Button Row: Cancel and Finish */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={handleCancelWorkout}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="close-circle" size={20} color={COLORS.error} />
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.finishButton}
+            onPress={handleFinishWorkout}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="checkmark-circle" size={24} color={COLORS.primary} />
+            <Text style={styles.finishButtonText}>Finish</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* GPS Status */}
@@ -408,6 +459,25 @@ const styles = StyleSheet.create({
   mainButtonText: {
     fontSize: TYPOGRAPHY.sizes.xl,
     color: '#fff',
+    fontFamily: TYPOGRAPHY.fonts.semiBold,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  cancelButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    gap: SPACING.xs,
+  },
+  cancelButtonText: {
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.error,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
   },
   finishButton: {

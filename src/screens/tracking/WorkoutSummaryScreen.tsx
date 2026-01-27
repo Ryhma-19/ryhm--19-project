@@ -113,25 +113,21 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
         calories,
         elevationGain > 0 ? elevationGain : undefined,
         notes.trim() || undefined,
-        feeling
+        feeling,
+        finalData.steps,
+        finalData.averageCadence,
+        finalData.maxCadence
       );
 
       console.log('Workout saved:', workoutId);
 
-      // Show success message
-      Alert.alert(
-        'Workout Saved!',
-        'Great job on completing your workout!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Navigate back
-              navigation.navigate('Track');
-            },
-          },
-        ]
-      );
+     navigation.reset({
+        index: 1,
+        routes: [
+          { name: 'TrackingHome' },
+          { name: 'WorkoutDetail', params: { workoutId } },
+        ],
+      }); 
     } catch (error) {
       console.error('Error saving workout:', error);
       Alert.alert(
@@ -153,7 +149,7 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
           text: 'Discard',
           style: 'destructive',
           onPress: () => {
-            navigation.navigate('Track');
+            navigation.navigate('TrackingHome');
           },
         },
       ]

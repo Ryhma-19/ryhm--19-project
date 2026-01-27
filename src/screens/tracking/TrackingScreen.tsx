@@ -13,6 +13,17 @@ export default function TrackingScreen({ navigation }: any) {
           Track your runs and walks with GPS
         </Text>
 
+        {/* History button */}
+        <TouchableOpacity 
+          style={styles.historyButton}
+          onPress={() => navigation.navigate('WorkoutList')}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="list" size={24} color={COLORS.primary} />
+          <Text style={styles.historyButtonText}>View History</Text>
+        </TouchableOpacity>
+
+        {/* Start button */}
         <TouchableOpacity
           style={styles.startButton}
           onPress={() => navigation.navigate('WorkoutSetup')}
@@ -24,7 +35,7 @@ export default function TrackingScreen({ navigation }: any) {
 
         <View style={styles.placeholder}>
           <Text style={styles.placeholderText}>
-            Past workouts will appear here
+            Your workout stats and progress be stored here
           </Text>
         </View>
       </View>
@@ -71,6 +82,23 @@ const styles = StyleSheet.create({
     fontFamily: TYPOGRAPHY.fonts.semiBold,
     color: '#fff',
   },
+  historyButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: COLORS.surface,
+  paddingVertical: SPACING.sm,
+  paddingHorizontal: SPACING.lg,
+  borderRadius: 12,
+  gap: SPACING.xs,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  marginBottom: SPACING.md,
+},
+historyButtonText: {
+  fontSize: TYPOGRAPHY.sizes.md,
+  fontFamily: TYPOGRAPHY.fonts.medium,
+  color: COLORS.primary,
+},
   placeholder: {
     marginTop: SPACING.xxl,
   },

@@ -12,7 +12,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './config';
-import { WorkoutSession, GPSPoint, SplitTime, WorkoutType } from '../../types/workout';
+import { WorkoutSession, GPSPoint, SplitTime, WorkoutType, FeelingType } from '../../types/workout';
 
 export class WorkoutService {
   private static readonly COLLECTION = 'workouts';
@@ -35,9 +35,26 @@ export class WorkoutService {
     calories?: number,
     elevationGain?: number,
     notes?: string,
-    feeling?: 'great' | 'good' | 'okay' | 'tired' | 'exhausted'
+    feeling?: FeelingType,
+    steps?: number,
+    averageCadence?: number,
+    maxCadence?: number
   ): Promise<string> {
     try {
+      // Avg speed
+      const totalSpeed = coordinates.reduce((sum, point) => sum + point.speed, 0);
+      const averageSpeed = coordinates.length > 0 ? totalSpeed / coordinates.length : 0;
+
+      // Consistency of pace
+      let speedConsistency = 0;
+      if (coordinates.length > 1) {
+        const speeds = coordinates.map(p => p.speed);
+        const mean = averageSpeed;
+        const variance = speeds.reduce((sum, speed) => sum + Math.pow(speed - mean, 2), 0) / speeds.length;
+        const stdDev = Math.sqrt(variance);
+        speedConsistency = mean > 0 ? Math.max(0, 1 - (stdDev / mean)) : 0;
+      }
+
       const workoutData = {
         userId,
         type,
@@ -68,7 +85,15 @@ export class WorkoutService {
         elevationGain: elevationGain || null,
         notes: notes || null,
         feeling: feeling || null,
-        personalRecords: [], // Will utilize achievements
+        personalRecords: [],
+        steps: steps || null,
+        averageCadence: averageCadence || null,
+        maxCadence: maxCadence || null,
+        averageSpeed: averageSpeed || null,
+        speedData: {
+          samples: coordinates.length,
+          consistency: speedConsistency,
+        },
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
@@ -95,42 +120,7 @@ export class WorkoutService {
       const workouts: WorkoutSession[] = [];
 
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        workouts.push({
-          id: doc.id,
-          userId: data.userId,
-          type: data.type,
-          name: data.name,
-          routeId: data.routeId,
-          routeName: data.routeName,
-          startTime: data.startTime.toDate(),
-          endTime: data.endTime.toDate(),
-          duration: data.duration,
-          pausedDuration: data.pausedDuration,
-          distance: data.distance,
-          averagePace: data.averagePace,
-          maxSpeed: data.maxSpeed,
-          coordinates: data.coordinates.map((point: any) => ({
-            latitude: point.latitude,
-            longitude: point.longitude,
-            timestamp: point.timestamp.toDate(),
-            speed: point.speed,
-            accuracy: point.accuracy,
-            altitude: point.altitude,
-          })),
-          splits: data.splits.map((split: any) => ({
-            distance: split.distance,
-            time: split.time,
-            pace: split.pace,
-          })),
-          calories: data.calories,
-          elevationGain: data.elevationGain,
-          notes: data.notes,
-          feeling: data.feeling,
-          personalRecords: data.personalRecords || [],
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate(),
-        });
+        workouts.push(this.convertDocToWorkout(doc.id, doc.data()));
       });
 
       console.log(`Loaded ${workouts.length} workouts for user`);
@@ -152,42 +142,7 @@ export class WorkoutService {
         return null;
       }
 
-      const data = docSnap.data();
-      return {
-        id: docSnap.id,
-        userId: data.userId,
-        type: data.type,
-        name: data.name,
-        routeId: data.routeId,
-        routeName: data.routeName,
-        startTime: data.startTime.toDate(),
-        endTime: data.endTime.toDate(),
-        duration: data.duration,
-        pausedDuration: data.pausedDuration,
-        distance: data.distance,
-        averagePace: data.averagePace,
-        maxSpeed: data.maxSpeed,
-        coordinates: data.coordinates.map((point: any) => ({
-          latitude: point.latitude,
-          longitude: point.longitude,
-          timestamp: point.timestamp.toDate(),
-          speed: point.speed,
-          accuracy: point.accuracy,
-          altitude: point.altitude,
-        })),
-        splits: data.splits.map((split: any) => ({
-          distance: split.distance,
-          time: split.time,
-          pace: split.pace,
-        })),
-        calories: data.calories,
-        elevationGain: data.elevationGain,
-        notes: data.notes,
-        feeling: data.feeling,
-        personalRecords: data.personalRecords || [],
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate(),
-      };
+      return this.convertDocToWorkout(docSnap.id, docSnap.data());
     } catch (error) {
       console.error('Error fetching workout:', error);
       throw new Error('Failed to fetch workout');
@@ -200,7 +155,7 @@ export class WorkoutService {
     updates: {
       name?: string;
       notes?: string;
-      feeling?: 'great' | 'good' | 'okay' | 'tired' | 'exhausted';
+      feeling?: FeelingType;
     }
   ): Promise<void> {
     try {
@@ -242,42 +197,7 @@ export class WorkoutService {
       const workouts: WorkoutSession[] = [];
 
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        workouts.push({
-          id: doc.id,
-          userId: data.userId,
-          type: data.type,
-          name: data.name,
-          routeId: data.routeId,
-          routeName: data.routeName,
-          startTime: data.startTime.toDate(),
-          endTime: data.endTime.toDate(),
-          duration: data.duration,
-          pausedDuration: data.pausedDuration,
-          distance: data.distance,
-          averagePace: data.averagePace,
-          maxSpeed: data.maxSpeed,
-          coordinates: data.coordinates.map((point: any) => ({
-            latitude: point.latitude,
-            longitude: point.longitude,
-            timestamp: point.timestamp.toDate(),
-            speed: point.speed,
-            accuracy: point.accuracy,
-            altitude: point.altitude,
-          })),
-          splits: data.splits.map((split: any) => ({
-            distance: split.distance,
-            time: split.time,
-            pace: split.pace,
-          })),
-          calories: data.calories,
-          elevationGain: data.elevationGain,
-          notes: data.notes,
-          feeling: data.feeling,
-          personalRecords: data.personalRecords || [],
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate(),
-        });
+        workouts.push(this.convertDocToWorkout(doc.id, doc.data()));
       });
 
       return workouts;
@@ -285,5 +205,79 @@ export class WorkoutService {
       console.error('Error loading workouts by route:', error);
       throw new Error('Failed to load workouts for this route');
     }
+  }
+
+// Get workouts for date range
+  static async getWorkoutsByDateRange(
+    userId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<WorkoutSession[]> {
+    try {
+      const q = query(
+        collection(db, this.COLLECTION),
+        where('userId', '==', userId),
+        where('startTime', '>=', Timestamp.fromDate(startDate)),
+        where('startTime', '<=', Timestamp.fromDate(endDate)),
+        orderBy('startTime', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const workouts: WorkoutSession[] = [];
+
+      querySnapshot.forEach((doc) => {
+        workouts.push(this.convertDocToWorkout(doc.id, doc.data()));
+      });
+
+      console.log(`Loaded ${workouts.length} workouts between ${startDate.toDateString()} and ${endDate.toDateString()}`);
+      return workouts;
+    } catch (error) {
+      console.error('Error loading workouts by date range:', error);
+      throw new Error('Failed to load workouts for date range');
+    }
+  }
+
+  // Convert for Firebase
+  private static convertDocToWorkout(id: string, data: any): WorkoutSession {
+    return {
+      id,
+      userId: data.userId,
+      type: data.type,
+      name: data.name || undefined,
+      routeId: data.routeId || undefined,
+      routeName: data.routeName || undefined,
+      startTime: data.startTime.toDate(),
+      endTime: data.endTime.toDate(),
+      duration: data.duration,
+      pausedDuration: data.pausedDuration,
+      distance: data.distance,
+      averagePace: data.averagePace,
+      maxSpeed: data.maxSpeed,
+      coordinates: data.coordinates.map((point: any) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+        timestamp: point.timestamp.toDate(),
+        speed: point.speed,
+        accuracy: point.accuracy,
+        altitude: point.altitude || undefined,
+      })),
+      splits: data.splits.map((split: any) => ({
+        distance: split.distance,
+        time: split.time,
+        pace: split.pace,
+      })),
+      calories: data.calories || undefined,
+      elevationGain: data.elevationGain || undefined,
+      notes: data.notes || undefined,
+      feeling: data.feeling || undefined,
+      personalRecords: data.personalRecords || [],
+      steps: data.steps || undefined,
+      averageCadence: data.averageCadence || undefined,
+      maxCadence: data.maxCadence || undefined,
+      averageSpeed: data.averageSpeed || undefined,
+      speedData: data.speedData || undefined,
+      createdAt: data.createdAt.toDate(),
+      updatedAt: data.updatedAt.toDate(),
+    };
   }
 }

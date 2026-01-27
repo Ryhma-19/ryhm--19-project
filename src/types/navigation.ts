@@ -15,7 +15,9 @@ export type RoutesStackParamList = {
   RoutePlanning: {
     editRoute?: RouteData;
   } | undefined;
-  // add RouteDetailsScreen later
+  RouteDetail: {
+    routeId: string;
+  };
 };
 
 // Tracking Stack
@@ -23,7 +25,7 @@ export type TrackingStackParamList = {
   TrackingHome: undefined;
   WorkoutSetup: undefined;
   ActiveWorkout: {
-    workoutType: WorkoutType;
+    workoutType: 'running' | 'walking';
     routeId?: string;
     routeName?: string;
   };
@@ -35,8 +37,15 @@ export type TrackingStackParamList = {
       gpsPoints: GPSPoint[];
       duration: number;
       pausedDuration: number;
+      steps: number;
+      averageCadence: number;
+      maxCadence: number;
     };
     startTime: Date;
+  };
+  WorkoutList: undefined;
+  WorkoutDetail: {
+    workoutId: string;
   };
 };
 
