@@ -1,203 +1,153 @@
 # Wellness - Fitness Tracking App
 
-A React Native mobile application that helps users track their outdoor activities, plan routes, monitor steps, and stay informed about weather conditions.
+A React Native mobile application designed to help you track your outdoor activities, plan running routes, monitor daily steps, and stay updated with real-time weather conditions. Stay motivated, reach your goals, and explore your surroundings.
 
 ## Features
 
-- 🏃 **Workout Tracking** – Track distance, duration, speed, and route coordinates during outdoor activities
-- 🗺️ **Route Planning & Management** – Create, save, and revisit favorite running/walking routes
-- 👟 **Step Counter** – Real-time step counting with daily goals and notifications
-- 🌦️ **Weather Integration** – Real-time weather updates via Finnish Meteorological Institute (FMI) API
-- 🔐 **User Authentication** – Secure sign-up and login with Firebase
-- 📊 **Fitness Stats** – View cumulative workouts, distance, streaks, and achievements
-- 🌙 **Dark Mode Support** – Customizable theme preferences
-- 📱 **Offline Support** – Local caching for routes and step data
+- 🏃 **Real-Time Workout Tracking** – Capture distance, duration, speed, and your exact route while exercising outdoors
+- 🗺️ **Smart Route Planning** – Save your favorite running paths and routes for future use
+- 👟 **Step Counter with Goals** – Track daily steps with customizable goals and receive notifications when you hit them
+- 🌦️ **Live Weather Updates** – Stay informed with real-time weather data integrated directly into your workouts
+- 🔐 **Secure Authentication** – Your data is protected with secure Firebase authentication
+- 📊 **Detailed Activity Stats** – View your weekly and monthly progress with breakdown statistics
+- 🌙 **Light & Dark Mode** – Customize the app appearance to match your preferences
+- 📱 **Fully Offline Capable** – All your data syncs to the cloud, but works great offline too
 
-## Tech Stack
+## What's Built In
 
-- **Framework:** React Native (Expo)
-- **Language:** TypeScript
-- **State Management:** React Context API
-- **Navigation:** React Navigation (Stack & Tab navigators)
-- **Backend:** Firebase (Authentication + Firestore)
-- **Location & Sensors:** Expo Location, Expo Sensors (Pedometer)
-- **Maps:** React Native Maps
-- **Weather API:** Finnish Meteorological Institute (FMI) WFS API
-- **Local Storage:** AsyncStorage
-- **Notifications:** Expo Notifications
-- **Package Manager:** npm
+- **React Native + Expo** – Cross-platform mobile app framework
+- **TypeScript** – Type-safe code development
+- **Firebase Backend** – Secure cloud storage and authentication
+- **GPS & Sensor Integration** – Real pedometer and location tracking
+- **Interactive Maps** – Built-in map visualization for your routes
+- **Weather API Integration** – Finnish Meteorological Institute weather data
+- **Local Data Caching** – Works offline with automatic cloud sync
 
-## Prerequisites
+## Getting Started
 
-- Node.js 16+ and npm
-- Expo CLI: `npm install -g expo-cli`
-- Android emulator or physical Android device (for Android builds)
-- Xcode 14+ (for iOS builds on macOS)
-- Firebase project with authentication and Firestore enabled
-- FMI API access (public – no auth required)
+### Requirements
+- Node.js 16 or newer
+- Expo CLI installed (`npm install -g expo-cli`)
+- An Android/iOS device or emulator
+- Firebase project (sign up at firebase.google.com)
 
-## Installation
+### Setup Instructions
 
-1. **Clone the repository:**
+1. **Clone this project:**
    ```bash
    git clone <repository-url>
    cd ryhma-19-project
    ```
 
-2. **Install dependencies:**
+2. **Install all dependencies:**
    ```bash
    npm install
    ```
 
-3. **Set up environment variables:**
-   Create a `.env` file in the project root with your Firebase credentials:
+3. **Create a `.env` file** with your Firebase credentials:
    ```
-   FIREBASE_API_KEY=your_api_key
-   FIREBASE_AUTH_DOMAIN=your_auth_domain
+   FIREBASE_API_KEY=your_key_here
+   FIREBASE_AUTH_DOMAIN=your_domain.firebaseapp.com
    FIREBASE_PROJECT_ID=your_project_id
-   FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
    FIREBASE_MESSAGING_SENDER_ID=your_sender_id
    FIREBASE_APP_ID=your_app_id
    ```
 
 ## Running the App
 
-### Development Server
+**Start development:**
 ```bash
 npm start
 ```
-This starts the Expo development server. Scan the QR code with Expo Go app (iOS/Android).
+Scan the QR code with Expo Go app to test on your phone.
 
-### Android
+**Run on Android:**
 ```bash
 npm run android
 ```
-Builds and runs the app on Android emulator or connected device.
 
-### iOS (macOS only)
+**Run on iOS (Mac only):**
 ```bash
 npm run ios
 ```
-Builds and runs the app on iOS simulator or connected device.
 
-### Web (Preview)
-```bash
-npm run web
-```
-Runs the app in a web browser (limited functionality for mobile-specific features).
-
-## Project Structure
+## Project Layout
 
 ```
 src/
-├── components/           # Reusable UI components
-│   ├── common/          # Shared components (WeatherCard, etc.)
-│   ├── map/             # Map-related components (MapView, RoutePlanner)
-│   └── routes/          # Route-specific components (RouteCard, RouteNameModal)
-├── constants/           # Configuration and theme constants
-│   ├── config.ts        # App configuration (API URLs, timings, milestones)
-│   ├── theme.ts         # Colors and typography
-│   └── mapConfig.ts     # Map-specific defaults
-├── contexts/            # React Context for state management
-│   ├── AuthContext.tsx  # Authentication and user state
-│   └── steps/           # Step tracking context
-├── hooks/               # Custom React hooks
-│   └── useWeather.ts    # Weather fetching hook
-├── navigation/          # React Navigation setup
-│   └── AppNavigator.tsx # Stack and tab navigation configuration
-├── screens/             # Full-screen components (one per route)
-│   ├── auth/            # Login and signup screens
-│   ├── home/            # Home dashboard
-│   ├── profile/         # User profile and settings
-│   ├── routes/          # Route listing and planning
-│   ├── steps/           # Step counter and daily goals
-│   └── tracking/        # Active workout tracking
-├── services/            # Business logic and external API integration
-│   ├── firebase/        # Firebase auth, Firestore, routing
-│   ├── location/        # GPS and location services
-│   ├── map/             # Direction and mapping utilities
-│   ├── steps/           # Pedometer and step persistence
-│   ├── storage/         # AsyncStorage management
-│   └── weather/         # FMI API weather service
-├── types/               # TypeScript type definitions
-│   ├── index.ts         # Core types (User, Route, Workout, etc.)
-│   ├── navigation.ts    # React Navigation param lists
-│   └── env.d.ts         # Environment variable types
-└── utils/               # Utility functions
-    └── routeUtils.ts    # Route calculation helpers
+├── components/           # UI building blocks
+│   ├── common/          # Reusable cards and widgets
+│   ├── map/             # Map components
+│   └── routes/          # Route UI components
+├── constants/           # App configuration and styling
+├── contexts/            # Global state management
+├── hooks/               # Custom React utilities
+├── navigation/          # App routing setup
+├── screens/             # Full page screens
+├── services/            # API and data handling
+│   ├── firebase/        # Backend integration
+│   ├── location/        # GPS services
+│   ├── motion/          # Speed and movement tracking
+│   ├── steps/           # Step counting
+│   └── weather/         # Weather data
+├── types/               # TypeScript definitions
+└── utils/               # Helper functions
 
-App.tsx                  # Root component with Context providers
-app.config.js            # Expo app configuration
-package.json             # Dependencies and scripts
-tsconfig.json            # TypeScript configuration
-babel.config.js          # Babel configuration for Expo
+App.tsx                  # Root app component
 ```
 
-## Key Concepts
+## Key Features Explained
 
-### Authentication Flow
-1. User signs up/logs in via Firebase
-2. AuthContext manages global user state
-3. Protected screens render only when `user !== null`
-4. DEV_AUTH_BYPASS flag allows testing without Firebase
+### How Steps Tracking Works
+The app uses your device's built-in pedometer to count steps throughout the day. Your daily count is saved locally and synced to our servers. Set a goal, and you'll get a notification when you hit it!
 
-### Step Tracking
-- Real-time pedometer updates via `Pedometer.watchStepCount()`
-- Daily steps stored locally (AsyncStorage) and in Firestore
-- Goal notifications sent once per day when target reached
-- Syncs across devices when user logs in
+### Route Tracking & Maps
+When you go for a run or walk, the app records your GPS path in real-time. These routes are saved so you can see exactly where you went, how far, and how long it took.
 
-### Route Management
-- Routes stored as coordinate arrays in Firestore
-- RoutePlanning screen captures live GPS coordinates
-- Directions service calculates total distance and duration
-- Offline support via route caching
+### Speed Monitoring
+Using GPS technology, the app continuously monitors your current speed, calculates average speed, and tracks your fastest pace during any activity.
 
 ### Weather Integration
-- FMI API returns XML with temperature, humidity, wind speed
-- 30-minute cache to reduce API calls
-- Fallback to bounding box query if point query fails
-- Weather snapshot saved with each workout
+Real-time weather information is pulled from Finnish Meteorological Institute and displayed on your home screen so you can see if you need a jacket before heading out.
 
-## Development Tips
+## Tips for Using the App
 
-### Bypass Authentication Locally
-In [src/constants/config.ts](src/constants/config.ts), set `DEV_AUTH_BYPASS: true` to skip Firebase login during development.
+**Testing without Firebase?**
+You can enable dev mode in `src/constants/config.ts` to skip login during development.
 
-### Permission Testing
-- Location and Pedometer permissions must be granted manually on device
-- iOS: Settings → App Name → enable Location, Health
-- Android: Settings → Apps → App Name → Permissions
+**Permissions**
+Make sure to grant location and health/fitness permissions when the app first asks. This is required for tracking to work.
 
-### Debugging
-- Use `console.log()` statements; view logs via `npm start` terminal
-- React DevTools available in Expo Go app settings
-- Network requests to FMI API are logged before execution
+**Clear Your Data**
+If you want to start fresh, you can clear all local data from the app settings.
 
-### Clearing Cache
-```javascript
-// In code or React DevTools console
-import { StorageService } from './src/services/storage/storage.service';
-StorageService.clearAll();
-```
+**Faster Syncing**
+Your activity data syncs to the cloud automatically, but you can also manually refresh by pulling down on the home screen.
 
-## Configuration
+## Troubleshooting
 
-All app-wide settings are in [src/constants/config.ts](src/constants/config.ts):
-- API endpoints and endpoints
-- Location tracking intervals
-- Workout notification thresholds
-- Achievement distance/streak milestones
-- Cache expiration times
+**App won't start?**
+- Clear your cache: `npm start -- --clear`
+- Reinstall dependencies: `rm -rf node_modules && npm install`
 
-Modify these without changing business logic files.
+**Location/steps not tracking?**
+- Check app permissions in your device settings
+- Make sure location services are enabled
+- Try restarting the app
 
-## Contributing
+**Firebase errors?**
+- Verify your `.env` file has correct credentials
+- Check that your Firebase project allows email/password auth
+- Make sure Firestore is enabled in your Firebase console
 
-1. Create a feature branch from `main`: `git checkout -b feature/your-feature`
-2. Make changes following the [Copilot Instructions](.github/copilot-instructions.md)
-3. Test on Android/iOS before pushing
-4. Submit a pull request with a clear description
+## Project Team
+
+Built by Group 19 as a group project.
+
+## License
+
+This project is available for educational and personal use.
 5. Ensure all types pass TypeScript checks: `npx tsc --noEmit`
 
 ## Troubleshooting
@@ -226,7 +176,3 @@ Modify these without changing business logic files.
 ## License
 
 This project is part of the Ryhma-19 group project.
-
-## Support
-
-For issues or questions, contact the development team or create an issue in the repository.

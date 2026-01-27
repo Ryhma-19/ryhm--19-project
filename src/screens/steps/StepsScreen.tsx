@@ -1,4 +1,3 @@
-// src/screens/StepsScreen.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,6 +12,8 @@ import {
 import { useSteps } from '../../contexts/steps/StepsContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { StepsService } from '../../services/steps/stepsService';
+import { WeeklyStepsChart } from '../../components/common/WeeklyStepsChart';
+import { MonthlyStepsChart } from '../../components/common/MonthlyStepsChart';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
 import { WeeklyStepsData, MonthlyStepsData } from '../../types/index';
 
@@ -150,32 +151,14 @@ const StepsScreen: React.FC = () => {
 
       {viewType === 'weekly' && (
         <>
-          {/* Weekly View */}
+          {/* Weekly Chart */}
           {loadingData ? (
             <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : weeklyData ? (
+            <WeeklyStepsChart data={weeklyData} dailyGoal={dailyGoal} />
           ) : (
             <View style={styles.card}>
-              <Text style={styles.periodTitle}>Week: {weeklyData?.week}</Text>
-              <Text style={styles.periodTotal}>Total: {weeklyData?.total} steps</Text>
-
-              <View style={styles.daysList}>
-                {weeklyData?.days.map((day, idx) => (
-                  <View key={idx} style={styles.dayItem}>
-                    <Text style={styles.dayDate}>{day.date}</Text>
-                    <View style={styles.dayBarContainer}>
-                      <View
-                        style={[
-                          styles.dayBar,
-                          {
-                            width: `${Math.min((day.steps / dailyGoal) * 100, 100)}%`,
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.daySteps}>{day.steps}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.emptyText}>No weekly data available</Text>
             </View>
           )}
         </>
@@ -183,35 +166,14 @@ const StepsScreen: React.FC = () => {
 
       {viewType === 'monthly' && (
         <>
-          {/* Monthly View */}
+          {/* Monthly Chart */}
           {loadingData ? (
             <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+          ) : monthlyData ? (
+            <MonthlyStepsChart data={monthlyData} dailyGoal={dailyGoal} />
           ) : (
             <View style={styles.card}>
-              <Text style={styles.periodTitle}>Month: {monthlyData?.month}</Text>
-              <Text style={styles.periodTotal}>Total: {monthlyData?.total} steps</Text>
-
-              {monthlyData?.weeks.map((week, idx) => (
-                <View key={idx} style={styles.weekSection}>
-                  <Text style={styles.weekTitle}>{week.week}</Text>
-                  <Text style={styles.weekTotal}>{week.total} steps</Text>
-
-                  {week.days.map((day, dayIdx) => (
-                    <View key={dayIdx} style={styles.monthDayItem}>
-                      <Text style={styles.monthDayDate}>{day.date}</Text>
-                      <View
-                        style={[
-                          styles.monthDayBar,
-                          {
-                            width: `${Math.min((day.steps / dailyGoal) * 100, 100)}%`,
-                          },
-                        ]}
-                      />
-                      <Text style={styles.monthDaySteps}>{day.steps}</Text>
-                    </View>
-                  ))}
-                </View>
-              ))}
+              <Text style={styles.emptyText}>No monthly data available</Text>
             </View>
           )}
         </>
@@ -449,6 +411,12 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginVertical: SPACING.xl,
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.sizes.md,
+    color: COLORS.text.secondary,
+    textAlign: 'center',
+    paddingVertical: SPACING.xl,
   },
   modal: {
     position: 'absolute',

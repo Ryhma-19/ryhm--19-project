@@ -4,9 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWeather } from '../../hooks/useWeather';
 import { WeatherCard } from '../../components/common/WeatherCard';
+import { MotionCard } from '../../components/common/MotionCard';
+import { DailyStepsCard } from '../../components/common/DailyStepsCard';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
   const { weather, loading, error, refresh } = useWeather();
   const [refreshing, setRefreshing] = React.useState(false);
@@ -25,6 +27,11 @@ export default function HomeScreen() {
     return 'Good evening';
   };
 
+  // Navigate to Steps screen
+  const handleStepsPress = () => {
+    navigation.navigate('Steps');
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -38,8 +45,14 @@ export default function HomeScreen() {
         <Text style={styles.userName}>{user?.displayName || 'User'}!</Text>
       </View>
 
+      {/* Daily Steps Card */}
+      <DailyStepsCard onPress={handleStepsPress} />
+
       {/* Weather Card */}
       <WeatherCard weather={weather} loading={loading} error={error} />
+
+      {/* Motion Card */}
+      <MotionCard />
 
       {/* Quick Actions */}
       <View style={styles.section}>
