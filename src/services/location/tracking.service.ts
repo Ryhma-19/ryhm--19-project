@@ -84,7 +84,7 @@ export class TrackingService {
       this.locationSubscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.BestForNavigation,
-          distanceInterval: 5,
+          distanceInterval: 10,
           timeInterval: 1000,
         },
         (location) => {

@@ -1,4 +1,4 @@
-import { GPSPoint, SplitTime } from '../../types/workout';
+import { GPSPoint, SplitTime } from '../types/workout';
 
 // Calculate distance between two points using Haversine formula
 export function calculateDistance(
@@ -125,7 +125,7 @@ export function calculateSplits(gpsPoints: GPSPoint[]): SplitTime[] {
 
     const completedKilometers = Math.floor(totalDistance / 1000);
     if (completedKilometers > splits.length) {
-      const splitDistance = 1000;
+      const splitDistance = 500;
       const currentTime = gpsPoints[i].timestamp.getTime();
       const splitDuration = (currentTime - lastSplitTime) / 1000;
       

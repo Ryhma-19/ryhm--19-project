@@ -1,4 +1,4 @@
-export type WorkoutType = 'running' | 'walking';
+export type WorkoutType = 'running' | 'walking'; //add cycling eventually
 
 export interface GPSPoint {
   latitude: number;

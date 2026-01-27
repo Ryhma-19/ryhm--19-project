@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { COLORS, TYPOGRAPHY } from '../constants/theme';
-import { RoutesStackParamList, AuthStackParamList, MainTabParamList } from '../types/navigation';
+import { RoutesStackParamList, AuthStackParamList, MainTabParamList, ProfileStackParamList, TrackingStackParamList } from '../types/navigation';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -20,14 +20,20 @@ import TrackingScreen from '../screens/tracking/TrackingScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import StepsScreen  from  '../screens/steps/StepsScreen';
 
+// Profile Screens
 import UserSettingsScreen from '../screens/profile/UserSettingsScreen';
 import PasswordUpdateScreen from '../screens/profile/PasswordUpdateScreen';
-import { ProfileStackParamList } from '../types';
+
+// Tracking Screens
+import WorkoutSetupScreen from '../screens/tracking/WorkoutSetupScreen';
+import ActiveWorkoutScreen from '../screens/tracking/ActiveWorkoutScreen';
+import WorkoutSummaryScreen from '../screens/tracking/WorkoutSummaryScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const RoutesStack = createNativeStackNavigator<RoutesStackParamList>();
+const TrackingStack = createNativeStackNavigator<TrackingStackParamList>();
 
 // Routes Stack Navigator
 function RoutesNavigator() {
@@ -59,7 +65,6 @@ function RoutesNavigator() {
           headerBackTitle: 'Routes',
         })}
       />
-      {/* Add RouteDetailsScreen here */}
     </RoutesStack.Navigator>
   );
 }
@@ -80,6 +85,7 @@ function AuthNavigator() {
   );
 }
 
+// Profile Stack Navigator
 function ProfileNavigator() {
   return (
     <ProfileStack.Navigator>
@@ -99,6 +105,68 @@ function ProfileNavigator() {
         options={{ title: 'Change Password' }}
       />
     </ProfileStack.Navigator>
+  );
+}
+
+// Tracking Stack Navigator
+function TrackingNavigator() {
+  return (
+    <TrackingStack.Navigator>
+      <TrackingStack.Screen
+        name="TrackingHome"
+        component={TrackingScreen}
+        options={{ 
+          title: 'Track',
+          headerStyle: {
+            backgroundColor: COLORS.primary,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: TYPOGRAPHY.fonts.semiBold,
+            fontSize: 18,
+          },
+        }}
+      />
+      <TrackingStack.Screen
+        name="WorkoutSetup"
+        component={WorkoutSetupScreen}
+        options={{ 
+          title: 'New Workout',
+          headerStyle: {
+            backgroundColor: COLORS.primary,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: TYPOGRAPHY.fonts.semiBold,
+            fontSize: 18,
+          },
+        }}
+      />
+      <TrackingStack.Screen
+        name="ActiveWorkout"
+        component={ActiveWorkoutScreen}
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <TrackingStack.Screen
+        name="WorkoutSummary"
+        component={WorkoutSummaryScreen}
+        options={{
+          title: 'Workout Complete',
+          headerBackVisible: false,
+          headerStyle: {
+            backgroundColor: COLORS.primary,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: TYPOGRAPHY.fonts.semiBold,
+            fontSize: 18,
+          },
+        }}
+      />
+    </TrackingStack.Navigator>
   );
 }
 
@@ -167,8 +235,9 @@ function MainNavigator() {
 
       <Tab.Screen
         name="Track"
-        component={TrackingScreen}
+        component={TrackingNavigator}
         options={{
+          headerShown: false,
           title: 'Track',
         }}
       />
