@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { WorkoutService } from '../../services/firebase/workout.service';
 import { GPSPoint, WorkoutType } from '../../types/workout';
+import { useAchievementDetector } from '../../hooks/useAchievementDetector';
 import {
   calculateTotalDistance,
   calculatePace,
@@ -57,10 +58,14 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
       gpsPoints: GPSPoint[];
       duration: number;
       pausedDuration: number;
+      steps?: number;
+      averageCadence?: number;
+      maxCadence?: number;
     };
     startTime: Date;
   };
 
+  const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [feeling, setFeeling] = useState<FeelingType | undefined>();
   const [saving, setSaving] = useState(false);
@@ -121,7 +126,10 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
 
       console.log('Workout saved:', workoutId);
 
-     navigation.reset({
+      setSavedWorkoutId(workoutId);
+
+      // Navigate to detail view
+      navigation.reset({
         index: 1,
         routes: [
           { name: 'TrackingHome' },
@@ -155,6 +163,16 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
       ]
     );
   };
+
+  // Achievement detection
+  useAchievementDetector({
+    userId: user?.id || '',
+    newWorkoutId: savedWorkoutId,
+    onAchievementsDetected: (achievements) => {
+      console.log('🏆 Achievements unlocked:', achievements);
+      // Achievement system hooks here
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -220,6 +238,26 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
             </View>
           )}
 
+          {/* Show steps */}
+          {finalData.steps && finalData.steps > 0 && (
+            <View style={styles.additionalStatItem}>
+              <Text style={styles.additionalStatLabel}>Steps</Text>
+              <Text style={styles.additionalStatValue}>
+                {finalData.steps.toLocaleString()}
+              </Text>
+            </View>
+          )}
+
+          {/* Show cadence */}
+          {finalData.averageCadence && finalData.averageCadence > 0 && (
+            <View style={styles.additionalStatItem}>
+              <Text style={styles.additionalStatLabel}>Avg Cadence</Text>
+              <Text style={styles.additionalStatValue}>
+                {finalData.averageCadence} spm
+              </Text>
+            </View>
+          )}
+
           <View style={styles.additionalStatItem}>
             <Text style={styles.additionalStatLabel}>GPS Points</Text>
             <Text style={styles.additionalStatValue}>{finalData.gpsPoints.length}</Text>
@@ -258,7 +296,7 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
               >
                 <Ionicons
                   name={feelingOption.icon as any}
-                  size={28}
+                  size={32}
                   color={feeling === feelingOption.value ? feelingOption.color : COLORS.text.secondary}
                 />
                 <Text

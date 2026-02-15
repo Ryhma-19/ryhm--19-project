@@ -31,7 +31,10 @@ import WorkoutSetupScreen from '../screens/tracking/WorkoutSetupScreen';
 import ActiveWorkoutScreen from '../screens/tracking/ActiveWorkoutScreen';
 import WorkoutSummaryScreen from '../screens/tracking/WorkoutSummaryScreen';
 import { WorkoutListScreen } from '../screens/tracking/WorkoutListScreen';
-import { WorkoutDetailScreen } from '../screens/tracking/WorkoutDetailScreen';
+import WorkoutDetailScreen from '../screens/tracking/WorkoutDetailScreen';
+
+// Analytics Screens
+import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
@@ -223,6 +226,8 @@ function MainNavigator() {
             iconName = focused ? 'map' : 'map-outline';
           } else if (route.name === 'Track') {
             iconName = focused ? 'play-circle' : 'play-circle-outline';
+          } else if (route.name === 'Analytics') {
+            iconName = focused ? 'stats-chart' : 'stats-chart-outline';
           } else if (route.name === 'Steps') {
             iconName = focused ? 'walk' : 'walk-outline';
           } else if (route.name === 'Profile') {
@@ -280,6 +285,22 @@ function MainNavigator() {
         options={{
           headerShown: false,
           title: 'Track',
+        }}
+      />
+
+      <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{
+          title: 'Stats',
+          headerStyle: {
+            backgroundColor: COLORS.primary,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: TYPOGRAPHY.fonts.semiBold,
+            fontSize: 18,
+          },
         }}
       />
 
