@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Switch, Alert, ScrollView } from 'react-native';
-import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
+import { COLORS, SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
 import { updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../services/firebase/config';
@@ -11,7 +11,6 @@ export default function UserSettingsScreen({ navigation }: any) {
   const { signOut } = useAuth()
   const { theme, setTheme } = useTheme();
   const user = auth.currentUser;
-  const [notifications, setNotifactions] = useState(false);
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
   const [loading, setLoading] = useState(false);
@@ -22,8 +21,8 @@ export default function UserSettingsScreen({ navigation }: any) {
   const handleSave = async () => {
     setLoading(true)
     if (!user) {
-        Alert.alert("No user detected")
-        return
+      Alert.alert("No user detected")
+      return
     }
 
     try {
@@ -92,15 +91,9 @@ export default function UserSettingsScreen({ navigation }: any) {
           onPress={() => navigation.navigate("PasswordUpdate")}
           >
           <Text style={styles.subtitle}>
-              Change password
+            Change password
           </Text>
         </TouchableOpacity>
-
-        <Text style={styles.subtitle}>Turn on notifications?</Text>
-        <Switch
-          value={notifications}
-          onValueChange={setNotifactions}
-        />
 
         <Text style={styles.subtitle}>Choose Theme</Text>
         <View style={styles.themeContainer}>
@@ -184,6 +177,7 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
     borderRadius: 8,
     padding: SPACING.sm,
     alignItems: 'center',
+    marginBottom: 16,
   },
   signOutButton: {
     backgroundColor: colors.error,
