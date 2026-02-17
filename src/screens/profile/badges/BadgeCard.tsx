@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet, Modal, Pressable } from "react-native"
 import { useEffect, useState, useMemo } from "react";
-import { Achievement, ICONS } from "../../../types"
+import { Achievement, AchievementStats, ICONS } from "../../../types"
 import { BadgeService } from "../../../services/badges/badge.service";
 import { useAuth } from "../../../contexts/AuthContext";
 
 const badge_rarity = {
   noRarity: {
-    color: "#fff"
+    color: "#f5f5f5"
   },
   bronze: {
     color: "#CE8946"
@@ -21,6 +21,7 @@ const badge_rarity = {
     color: "#4c6ba5"
   }
 }
+
 
 type rarityKey = keyof typeof badge_rarity;
 
@@ -48,28 +49,67 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
   }, [badge.progress, badge.milestones])
 
   useEffect(() => {
-  if (!badge.milestones?.length) {
-    setNextMilestone(null)
-    setProgressPercent(null)
-    return
+    if (!badge.milestones?.length) {
+      setNextMilestone(null)
+      setProgressPercent(null)
+      return
+    }
+
+    const next = badge.milestones.find(num => badge.progress < num) ?? null
+
+    setNextMilestone(next)
+
+    if (next === null || next === 0) {
+      setProgressPercent(null)
+      return
+    }
+
+    const percent = Math.min((badge.progress / next) * 100, 100)
+
+    setProgressPercent(percent)
+  }, [badge.progress, badge.milestones])
+
+  function formatDuration(seconds: number) {
+    if (seconds < 60) {
+      return `${seconds}s`
+    }
+
+    if (seconds < 3600) {
+      const minutes = Math.round(seconds / 60)
+      return `${minutes}m`
+    }
+
+    const hours = Math.round(seconds / 3600)
+    const minutes = Math.round((seconds % 3600) / 60)
+
+    return `${hours}h ${minutes}m`
   }
 
-  const next = badge.milestones.find(num => badge.progress < num) ?? null
+  function formatDistance(meters: number) {
+    if (meters < 1000) {
+      return `${meters} m`
+    }
 
-  setNextMilestone(next)
+    const kilometers = (meters / 1000).toFixed(1)
 
-  if (next === null || next === 0) {
-    setProgressPercent(null)
-    return
+    return `${kilometers} km`
   }
 
-  const percent = Math.min((badge.progress / next) * 100, 100)
+  const formatterMap: Partial<
+  Record<keyof AchievementStats, (value: number) => string>> = {
+    duration: formatDuration,
+    distance: formatDistance,
+    averagePace: (v) => `${v} min/km`,
+    longestRun: formatDistance,
+    currentStreak: (v) => `${v} days`,
+    longestStreak: (v) => `${v} days`,
+  }
 
-  setProgressPercent(percent)
-}, [badge.progress, badge.milestones])
 
-  const handleModalVisibility = () => {
-    setModalVisible(!modalVisible)
+  function formatBadgeProgress(type: keyof AchievementStats, progress: number) {
+    const formatter = formatterMap[type]
+
+    return formatter ? formatter(progress) : `${progress}`
   }
 
   return (
@@ -93,7 +133,7 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
           <Text style={styles.modalTitle}>{badge.title}</Text>
 
           {badge.isUnlocked && badge.progress && (
-            <Text style={styles.modalProgress}>{badge.progress}</Text>
+            <Text style={styles.modalProgress}>{formatBadgeProgress(badge.type as keyof AchievementStats, badge.progress)}</Text>
           )}
 
           {badge.isUnlocked && progressPercent && progressPercent > 0 && (
@@ -106,15 +146,9 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
             <Text style={styles.desc}>Next milestone: {nextMilestone}</Text>
           )}
 
-          {!badge.isUnlocked && (
-            <Pressable 
-            style={styles.modalButton}
-            onPress={() => BadgeService.saveBadgeToUser(user?.id, badge.id)}
-            >
-              <Text style={styles.modalButtonText}>Unlock</Text>
-            </Pressable>
+          {badge.isUnlocked && badge.unlockedAt && (
+            <Text style={styles.desc}>Unlocked at: {badge.unlockedAt.toDateString()}</Text>
           )}
-
           {badge.isUnlocked && (
             <Pressable
               style={styles.modalButton}
@@ -130,7 +164,7 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
       </Modal>
 
       <Pressable
-      onPress={() => handleModalVisibility()}
+      onPress={() => setModalVisible(!modalVisible)}
       >
         <View style={[styles.card, !badge.isUnlocked && styles.locked]}>
           <View style={[styles.background, {backgroundColor: badge_rarity[rarity].color}]}>
@@ -140,7 +174,7 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
           <Text style={styles.badgeTitle} numberOfLines={2}>{badge.title}</Text>
 
           {badge.progress && (
-            <Text>{badge.progress}</Text>
+            <Text>{formatBadgeProgress(badge.type as keyof AchievementStats, badge.progress)}</Text>
           )}
       
         </View>

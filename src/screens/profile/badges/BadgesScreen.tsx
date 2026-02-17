@@ -43,10 +43,7 @@ export default function BadgeScreen() {
       if (a.isUnlocked !== b.isUnlocked) {
         return a.isUnlocked ? -1 : 1;
       }
-
       return 0
-
-      //return (b.progress / b.target) - (a.progress / a.target);
     });
   }, [badges]);
 
