@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MonthlyStepsData } from '../../types/index';
 import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
 
@@ -9,98 +9,103 @@ interface MonthlyStepsChartProps {
 }
 
 export const MonthlyStepsChart: React.FC<MonthlyStepsChartProps> = ({ data, dailyGoal }) => {
-  // Sort weeks by their week number
-  const sortedWeeks = [...data.weeks].sort(
-    (a, b) => a.week.localeCompare(b.week)
-  );
+  // Flatten all days from all weeks into a lookup map
+  const allDays = data.weeks.flatMap(w => w.days);
+  const dayLookup: Record<string, number> = {};
+  allDays.forEach(d => { dayLookup[d.date] = d.steps; });
 
-  // Get max value for scaling
-  const maxSteps = Math.max(dailyGoal * 1.2 * 7, Math.max(...sortedWeeks.map(w => w.total), 1));
+  // Parse month (format: YYYY-MM) and build full month array (fill missing days with 0)
+  const [yearStr, monthStr] = data.month.split('-');
+  const year = Number(yearStr) || new Date().getFullYear();
+  const month = Number(monthStr) || (new Date().getMonth() + 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
 
-  const getWeekLabel = (week: string) => {
-    // Extract week number from YYYY-W## format
-    const match = week.match(/W(\d+)/);
-    return match ? `W${match[1]}` : week;
-  };
+  const monthDays = Array.from({ length: daysInMonth }, (_, i) => {
+    const dayNum = i + 1;
+    const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+    return { date: dateKey, steps: dayLookup[dateKey] ?? 0 };
+  });
+
+  // Scale against the largest daily value or goal
+  const maxSteps = Math.max(dailyGoal * 1.2, Math.max(...monthDays.map(d => d.steps), 1));
+
+  // Summary stats (use full month length so blanks count as 0)
+  const total = monthDays.reduce((s, d) => s + d.steps, 0);
+  const avgPerDay = Math.round(total / daysInMonth);
+  const daysWithGoal = monthDays.filter(d => d.steps >= dailyGoal).length;
+  const bestDay = monthDays.length > 0 ? Math.max(...monthDays.map(d => d.steps)) : 0;
+
+  const getDayLabel = (date: string) => String(new Date(date).getDate());
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Monthly Steps</Text>
-      <Text style={styles.total}>Total: {data.total.toLocaleString()} steps</Text>
+      <Text style={styles.total}>Total: {total.toLocaleString()} steps</Text>
 
       <View style={styles.chartContainer}>
-        {/* Y-axis labels */}
+        {/* Y-axis */}
         <View style={styles.yAxis}>
           <Text style={styles.yAxisLabel}>{Math.round(maxSteps).toLocaleString()}</Text>
           <Text style={styles.yAxisLabel}>{Math.round(maxSteps / 2).toLocaleString()}</Text>
           <Text style={styles.yAxisLabel}>0</Text>
         </View>
 
-        {/* Bars */}
-        <View style={styles.barsContainer}>
-          {sortedWeeks.map((week) => {
-            const weekGoal = dailyGoal * 7; // Goal for entire week
-            const reachedGoal = week.total >= weekGoal;
-            
+        {/* Daily bars — horizontally scrollable to accommodate ~28–31 bars */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.barsScroll}
+        >
+          {monthDays.map((day) => {
+            const reachedGoal = day.steps >= dailyGoal;
             return (
-              <View key={week.week} style={styles.barWrapper}>
+              <View key={day.date} style={styles.barWrapper}>
                 <View style={styles.barColumn}>
-                  {/* Goal line indicator */}
                   <View
                     style={[
                       styles.goalLine,
-                      { bottom: `${(weekGoal / maxSteps) * 100}%` },
+                      { bottom: `${(dailyGoal / maxSteps) * 100}%` },
                     ]}
                   />
-                  
-                  {/* Bar */}
+
                   <View
                     style={[
                       styles.bar,
                       {
-                        height: `${(week.total / maxSteps) * 100}%`,
+                        height: `${(day.steps / maxSteps) * 100}%`,
                         backgroundColor: reachedGoal ? COLORS.success : COLORS.primary,
                       },
                     ]}
                   />
                 </View>
-                
-                {/* Label */}
-                <Text style={styles.barLabel}>{getWeekLabel(week.week)}</Text>
-                <Text style={styles.barValue}>{week.total.toLocaleString()}</Text>
+
+                <Text style={styles.barLabel}>{getDayLabel(day.date)}</Text>
+                <Text style={styles.barValue}>{day.steps.toLocaleString()}</Text>
               </View>
             );
           })}
-        </View>
+        </ScrollView>
       </View>
 
       {/* Stats Summary */}
       <View style={styles.statsGrid}>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Average per Week</Text>
-          <Text style={styles.statValue}>
-            {data.weeks.length > 0
-              ? Math.round(data.total / data.weeks.length).toLocaleString()
-              : 0}
-          </Text>
+          <Text style={styles.statLabel}>Average per Day</Text>
+          <Text style={styles.statValue}>{avgPerDay.toLocaleString()}</Text>
           <Text style={styles.statUnit}>steps</Text>
         </View>
-        
+
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Weeks with Goal</Text>
+          <Text style={styles.statLabel}>Days with Goal</Text>
           <Text style={styles.statValue}>
-            {data.weeks.filter(w => w.total >= dailyGoal * 7).length}
-            <Text style={styles.statUnit}>/{data.weeks.length}</Text>
+            {daysWithGoal}
+            <Text style={styles.statUnit}>/{daysInMonth}</Text>
           </Text>
         </View>
 
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Best Week</Text>
-          <Text style={styles.statValue}>
-            {data.weeks.length > 0
-              ? Math.max(...data.weeks.map(w => w.total)).toLocaleString()
-              : 0}
-          </Text>
+          <Text style={styles.statLabel}>Best Day</Text>
+          <Text style={styles.statValue}>{bestDay.toLocaleString()}</Text>
           <Text style={styles.statUnit}>steps</Text>
         </View>
       </View>
@@ -117,7 +122,7 @@ export const MonthlyStepsChart: React.FC<MonthlyStepsChartProps> = ({ data, dail
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: COLORS.warning, width: 2, height: 8 }]} />
-          <Text style={styles.legendText}>Weekly Goal</Text>
+          <Text style={styles.legendText}>Daily Goal</Text>
         </View>
       </View>
     </View>
@@ -150,7 +155,7 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     flexDirection: 'row',
-    height: 240,
+    height: 260,
     marginBottom: SPACING.lg,
   },
   yAxis: {
@@ -164,20 +169,20 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     textAlign: 'right' as const,
   },
-  barsContainer: {
-    flex: 1,
+  barsScroll: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'flex-end',
     paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
   },
   barWrapper: {
     alignItems: 'center',
-    flex: 1,
+    width: 28,
+    marginHorizontal: SPACING.xs,
   },
   barColumn: {
-    width: '70%',
-    maxWidth: 45,
+    width: '100%',
+    maxWidth: 28,
     height: 200,
     justifyContent: 'flex-end',
     position: 'relative',
@@ -197,12 +202,13 @@ const styles = StyleSheet.create({
   barLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
     color: COLORS.text.primary,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
     fontWeight: '600' as const,
   },
   barValue: {
     fontSize: TYPOGRAPHY.sizes.xs,
     color: COLORS.text.secondary,
+    marginTop: SPACING.xs,
   },
   statsGrid: {
     flexDirection: 'row',
