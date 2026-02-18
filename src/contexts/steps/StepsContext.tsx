@@ -58,7 +58,7 @@ export const StepsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const todayKey = new Date().toISOString().slice(0, 10);
     setToday(todayKey);
-    goalNotificationSentRef.current = false; // Reset notification flag on new day
+    goalNotificationSentRef.current = false;
 
     let subscription: any;
 
@@ -222,7 +222,7 @@ export const StepsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 body: `Great job! You've achieved ${steps} steps today.`,
                 sound: 'default',
               },
-              trigger: null, // Send immediately
+              trigger: null, 
             });
           } catch (err) {
             console.error('Error sending notification:', err);

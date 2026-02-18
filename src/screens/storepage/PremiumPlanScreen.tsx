@@ -47,7 +47,6 @@ export default function PremiumPlanScreen() {
   const dietPacks = StoreService.getDietPacks();
 
   const handlePurchase = (pack: Pack) => {
-    // Note: Purchase functionality to be implemented
     Alert.alert(
       'Purchase',
       `Purchase ${pack.title} for €${pack.price}?`,
