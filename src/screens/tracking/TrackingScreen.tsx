@@ -23,7 +23,7 @@ export default function TrackingScreen({ navigation }: any) {
           onPress={() => navigation.navigate('WorkoutList')}
           activeOpacity={0.7}
         >
-          <Ionicons name="list" size={24} color={COLORS.primary} />
+          <Ionicons name="list" size={24} color={colors.primary} />
           <Text style={styles.historyButtonText}>View History</Text>
         </TouchableOpacity>
 
@@ -89,19 +89,19 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   historyButton: {
   flexDirection: 'row',
   alignItems: 'center',
-  backgroundColor: COLORS.surface,
+  backgroundColor: colors.surface,
   paddingVertical: SPACING.sm,
   paddingHorizontal: SPACING.lg,
   borderRadius: 12,
   gap: SPACING.xs,
   borderWidth: 1,
-  borderColor: COLORS.border,
+  borderColor: colors.border,
   marginBottom: SPACING.md,
 },
 historyButtonText: {
   fontSize: TYPOGRAPHY.sizes.md,
   fontFamily: TYPOGRAPHY.fonts.medium,
-  color: COLORS.primary,
+  color: colors.primary,
 },
   placeholder: {
     marginTop: SPACING.xxl,

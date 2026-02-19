@@ -397,7 +397,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
             onPress={handleCancelWorkout}
             activeOpacity={0.8}
           >
-            <Ionicons name="close-circle" size={20} color={COLORS.error} />
+            <Ionicons name="close-circle" size={20} color={colors.error} />
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
 
@@ -406,7 +406,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
             onPress={handleFinishWorkout}
             activeOpacity={0.8}
           >
-            <Ionicons name="checkmark-circle" size={24} color={COLORS.primary} />
+            <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
             <Text style={styles.finishButtonText}>Finish</Text>
           </TouchableOpacity>
         </View>
@@ -583,7 +583,7 @@ const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create
   },
   cancelButtonText: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.error,
+    color: colors.error,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
   },
   finishButton: {
