@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { WorkoutService } from '../../services/firebase/workout.service';
 import { GPSPoint, WorkoutType } from '../../types/workout';
+import { useAchievementDetector } from '../../hooks/useAchievementDetector';
+import { saveDetectedBadges } from '../../utils/achievementBridge';
 import {
   calculateTotalDistance,
   calculatePace,
@@ -61,33 +63,72 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
       gpsPoints: GPSPoint[];
       duration: number;
       pausedDuration: number;
+      steps?: number;
+      averageCadence?: number;
+      maxCadence?: number;
     };
-    startTime: Date;
+    startTime: string;
   };
 
+  console.log('WorkoutSummaryScreen mounted with:', {
+    workoutType,
+    gpsPoints: finalData.gpsPoints.length,
+    duration: finalData.duration,
+    startTime,
+  });
+
+  const [savedWorkoutId, setSavedWorkoutId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [feeling, setFeeling] = useState<FeelingType | undefined>();
   const [saving, setSaving] = useState(false);
 
-  // Calculate final stats
-  const distance = calculateTotalDistance(finalData.gpsPoints);
+  const gpsPointsWithDates = finalData.gpsPoints.map(point => ({
+    ...point,
+    timestamp: typeof point.timestamp === 'number' 
+      ? new Date(point.timestamp) 
+      : point.timestamp,
+  }));
+
+  // Calculate final stats using deserialized GPS points
+  const distance = calculateTotalDistance(gpsPointsWithDates);
   const averagePace = calculatePace(distance, finalData.duration);
-  const splits = calculateSplits(finalData.gpsPoints);
-  const elevationGain = calculateElevationGain(finalData.gpsPoints);
+  const splits = calculateSplits(gpsPointsWithDates);
+  const elevationGain = calculateElevationGain(gpsPointsWithDates);
   
-  // Calculate max speed
-  const maxSpeed = finalData.gpsPoints.reduce((max, point) => 
-    Math.max(max, point.speed), 0
-  );
+  // Calculate max speed and handle empty array
+  const maxSpeed = gpsPointsWithDates.length > 0
+    ? gpsPointsWithDates.reduce((max, point) => Math.max(max, point.speed), 0)
+    : 0;
 
-  // Estimate calories, uses default weight 70kg for the time being, implementation for fetching user weight from profile later
   const calories = estimateCalories(distance, 70, averagePace);
+  const workoutStartTime = typeof startTime === 'string' ? new Date(startTime) : startTime;
+  const endTime = new Date(workoutStartTime.getTime() + (finalData.duration + finalData.pausedDuration) * 1000);
+  const suggestedName = suggestWorkoutName(workoutType, workoutStartTime);
 
-  // Calculate end time
-  const endTime = new Date(startTime.getTime() + (finalData.duration + finalData.pausedDuration) * 1000);
+  // Debug logs
+  console.log('Calculated values:', {
+    distance: distance,
+    distanceIsFinite: isFinite(distance),
+    averagePace: averagePace,
+    averagePaceIsFinite: isFinite(averagePace),
+    calories: calories,
+    caloriesIsFinite: isFinite(calories),
+    elevationGain: elevationGain,
+    elevationGainIsFinite: isFinite(elevationGain),
+    maxSpeed: maxSpeed,
+    maxSpeedIsFinite: isFinite(maxSpeed),
+    suggestedName: suggestedName,
+    suggestedNameType: typeof suggestedName,
+    splitsCount: splits.length,
+  });
 
-  // Suggest a workout name
-  const suggestedName = suggestWorkoutName(workoutType, startTime);
+  if (splits.length > 0) {
+    console.log('Split paces:', splits.map((s, i) => ({
+      km: i + 1,
+      pace: s.pace,
+      paceIsFinite: isFinite(s.pace),
+    })));
+  }
 
   const handleSave = async () => {
     if (!user) {
@@ -103,39 +144,31 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
       const workoutId = await WorkoutService.createWorkout(
         user.id,
         workoutType,
-        startTime,
+        workoutStartTime,
         endTime,
         finalData.duration,
         finalData.pausedDuration,
         distance,
         averagePace,
         maxSpeed,
-        finalData.gpsPoints,
+        gpsPointsWithDates,
         splits,
-        routeId,
-        routeName,
-        calories,
+        routeId || undefined,
+        routeName || undefined,
+        isFinite(calories) ? calories : 0,
         elevationGain > 0 ? elevationGain : undefined,
         notes.trim() || undefined,
-        feeling
+        feeling,
+        finalData.steps,
+        finalData.averageCadence,
+        finalData.maxCadence
       );
 
       console.log('Workout saved:', workoutId);
+      setSavedWorkoutId(workoutId);
 
-      // Show success message
-      Alert.alert(
-        'Workout Saved!',
-        'Great job on completing your workout!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Navigate back
-              navigation.navigate('Track');
-            },
-          },
-        ]
-      );
+      // Navigate
+      navigation.navigate('WorkoutDetail', { workoutId }); 
     } catch (error) {
       console.error('Error saving workout:', error);
       Alert.alert(
@@ -157,12 +190,35 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
           text: 'Discard',
           style: 'destructive',
           onPress: () => {
-            navigation.navigate('Track');
+            navigation.navigate('TrackingHome');
           },
         },
       ]
     );
   };
+
+  // Achievement detection
+  const handleAchievementsDetected = useCallback((achievements: any[]) => {
+  console.log('🏆 Achievements unlocked:', achievements);
+  saveDetectedBadges(user?.id, achievements);
+  }, [user?.id]);
+
+  useAchievementDetector({
+  userId: user?.id || '',
+  newWorkoutId: savedWorkoutId,
+  onAchievementsDetected: handleAchievementsDetected,
+});
+
+// Logs for testing
+console.log('Rendering, checking all text values:', {
+  'formatDuration(duration)': formatDuration(finalData.duration || 0),
+  'formatDistance(distance)': formatDistance(distance || 0),
+  'formatPace(averagePace)': averagePace > 0 && isFinite(averagePace) ? formatPace(averagePace) : '--:--/km',
+  'suggestedName': suggestedName || 'Workout',
+  'notes.length': notes.length,
+  'saving': saving,
+});
+
 
   return (
     <View style={styles.container}>
@@ -175,31 +231,33 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
         <View style={styles.header}>
           <Ionicons name="checkmark-circle" size={64} color={colors.success} />
           <Text style={styles.headerTitle}>Workout Complete!</Text>
-          <Text style={styles.headerSubtitle}>{suggestedName}</Text>
+          <Text style={styles.headerSubtitle}>{suggestedName || 'Workout'}</Text>
         </View>
 
         {/* Main Stats */}
         <View style={styles.statsCard}>
           <View style={styles.statRow}>
             <View style={styles.statBox}>
-              <Ionicons name="time" size={24} color={colors.primary} />
-              <Text style={styles.statValue}>{formatDuration(finalData.duration)}</Text>
+              <Ionicons name="time" size={24} color={COLORS.primary} />
+              <Text style={styles.statValue}>{formatDuration(finalData.duration || 0)}</Text>
               <Text style={styles.statLabel}>Duration</Text>
             </View>
 
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Ionicons name="trending-up" size={24} color={colors.primary} />
-              <Text style={styles.statValue}>{formatDistance(distance)}</Text>
+              <Ionicons name="trending-up" size={24} color={COLORS.primary} />
+              <Text style={styles.statValue}>{formatDistance(distance || 0)}</Text>
               <Text style={styles.statLabel}>Distance</Text>
             </View>
 
             <View style={styles.statDivider} />
 
             <View style={styles.statBox}>
-              <Ionicons name="speedometer" size={24} color={colors.primary} />
-              <Text style={styles.statValue}>{formatPace(averagePace)}</Text>
+              <Ionicons name="speedometer" size={24} color={COLORS.primary} />
+              <Text style={styles.statValue}>
+                {averagePace > 0 && isFinite(averagePace) ? formatPace(averagePace) : '--:--/km'}
+              </Text>
               <Text style={styles.statLabel}>Avg Pace</Text>
             </View>
           </View>
@@ -209,13 +267,17 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
         <View style={styles.additionalStats}>
           <View style={styles.additionalStatItem}>
             <Text style={styles.additionalStatLabel}>Calories Burned</Text>
-            <Text style={styles.additionalStatValue}>~{calories} kcal</Text>
+            <Text style={styles.additionalStatValue}>
+              ~{isFinite(calories) ? Math.round(calories) : 0} kcal
+            </Text>
           </View>
 
           {elevationGain > 0 && (
             <View style={styles.additionalStatItem}>
               <Text style={styles.additionalStatLabel}>Elevation Gain</Text>
-              <Text style={styles.additionalStatValue}>+{Math.round(elevationGain)}m</Text>
+              <Text style={styles.additionalStatValue}>
+                +{isFinite(elevationGain) ? Math.round(elevationGain) : 0}m
+              </Text>
             </View>
           )}
 
@@ -223,14 +285,34 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
             <View style={styles.additionalStatItem}>
               <Text style={styles.additionalStatLabel}>Paused Time</Text>
               <Text style={styles.additionalStatValue}>
-                {formatDuration(finalData.pausedDuration)}
+                {formatDuration(finalData.pausedDuration || 0)}
               </Text>
             </View>
           )}
 
+          {/* Show steps */}
+          {(finalData.steps ?? 0) > 0 && (
+          <View style={styles.additionalStatItem}>
+          <Text style={styles.additionalStatLabel}>Steps</Text>
+          <Text style={styles.additionalStatValue}>
+          {finalData.steps!.toLocaleString()}
+          </Text>
+          </View>
+          )}
+
+          {/* Show cadence */}
+          {(finalData.averageCadence ?? 0) > 0 && (
+          <View style={styles.additionalStatItem}>
+          <Text style={styles.additionalStatLabel}>Avg Cadence</Text>
+          <Text style={styles.additionalStatValue}>
+          {Math.round(finalData.averageCadence!)} spm
+          </Text>
+          </View>
+          )}
+
           <View style={styles.additionalStatItem}>
             <Text style={styles.additionalStatLabel}>GPS Points</Text>
-            <Text style={styles.additionalStatValue}>{finalData.gpsPoints.length}</Text>
+            <Text style={styles.additionalStatValue}>{gpsPointsWithDates.length || 0}</Text>
           </View>
         </View>
 
@@ -242,7 +324,9 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
               {splits.map((split, index) => (
                 <View key={index} style={styles.splitItem}>
                   <Text style={styles.splitKm}>Km {index + 1}</Text>
-                  <Text style={styles.splitPace}>{formatPace(split.pace)}</Text>
+                  <Text style={styles.splitPace}>
+                    {split.pace > 0 && isFinite(split.pace) ? formatPace(split.pace) : '--:--/km'}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -266,8 +350,8 @@ export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSumma
               >
                 <Ionicons
                   name={feelingOption.icon as any}
-                  size={28}
-                  color={feeling === feelingOption.value ? feelingOption.color : colors.text.secondary}
+                  size={32}
+                  color={feeling === feelingOption.value ? feelingOption.color : COLORS.text.secondary}
                 />
                 <Text
                   style={[

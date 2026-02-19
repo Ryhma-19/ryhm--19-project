@@ -1,4 +1,6 @@
-export type WorkoutType = 'running' | 'walking'; //add cycling eventually
+export type WorkoutType = 'running' | 'walking';
+
+export type FeelingType = 'great' | 'good' | 'okay' | 'tired' | 'exhausted';
 
 export interface GPSPoint {
   latitude: number;
@@ -19,7 +21,6 @@ export interface SplitTime {
 export interface WorkoutSession {
   id: string;
   userId: string;
-  
   type: WorkoutType;
   name?: string;
   
@@ -36,14 +37,23 @@ export interface WorkoutSession {
   maxSpeed: number;
   
   coordinates: GPSPoint[];
-  
   splits: SplitTime[];
   
   calories?: number;
   elevationGain?: number;
+
+  steps?: number;
+  averageCadence?: number;
+  maxCadence?: number;
+
+  averageSpeed?: number;
+  speedData?: {
+    samples: number;
+    consistency: number;
+  };
   
   notes?: string;
-  feeling?: 'great' | 'good' | 'okay' | 'tired' | 'exhausted';
+  feeling?: FeelingType;
   
   personalRecords: string[];
   
@@ -65,6 +75,54 @@ export interface LiveWorkoutStats {
   distance: number;
   currentPace: number;
   averagePace: number;
-  isPaused: boolean;
+  currentSpeed: number;
   coordinates: GPSPoint[];
+  steps: number;
+  currentCadence: number;
+}
+
+export interface WorkoutAnalytics {
+  totalWorkouts: number;
+  totalDistance: number;
+  totalDuration: number;
+  totalSteps: number;
+  totalCalories: number;
+
+  averageDistance: number;
+  averagePace: number;
+  averageCadence: number;
+
+  // Personal bests
+  longestRun: {
+    workoutId: string;
+    distance: number;
+    date: Date;
+  };
+  fastestPace: {
+    workoutId: string;
+    pace: number;
+    date: Date;
+  };
+  mostSteps: {
+    workoutId: string;
+    steps: number;
+    date: Date;
+  };
+  longestDuration: {
+    workoutId: string;
+    duration: number;
+    date: Date;
+  };
+
+  periodStart: Date;
+  periodEnd: Date;
+}
+
+export interface AchievementData {
+  workoutId: string;
+  achievementType: string;
+  metric: string;
+  value: number;
+  previousBest?: number;
+  timestamp: Date;
 }
