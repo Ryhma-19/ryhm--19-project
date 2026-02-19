@@ -16,7 +16,8 @@ import { calculateRouteDistance, formatDistance } from '../../utils/routeUtils';
 import { DirectionsService, DirectionsResponse } from '../../services/map/directions.service';
 import { RouteService } from '../../services/firebase/route.service';
 import RouteNameModal from '../../components/routes/RouteNameModal';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getColors } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 import { MAP_CONFIG } from '../../constants/mapConfig';
 
 interface RoutePlannerProps {
@@ -27,6 +28,9 @@ interface RoutePlannerProps {
 }
 
 export function RoutePlanner({ initialRegion, onSaveRoute, initialWaypoints }: RoutePlannerProps) {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [waypoints, setWaypoints] = useState<Waypoint[]>(initialWaypoints || []);
   const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number; longitude: number }[]>([]);
   const [distance, setDistance] = useState(0);
@@ -194,7 +198,7 @@ export function RoutePlanner({ initialRegion, onSaveRoute, initialWaypoints }: R
       {isLoadingRoute && (
         <View style={styles.loadingOverlay}>
           <View style={styles.loadingCard}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.loadingText}>Calculating route...</Text>
           </View>
         </View>
@@ -232,7 +236,7 @@ export function RoutePlanner({ initialRegion, onSaveRoute, initialWaypoints }: R
                 onPress={handleUndo}
                 disabled={waypoints.length === 0}
               >
-                <Ionicons name="arrow-undo" size={20} color={COLORS.text.primary} />
+                <Ionicons name="arrow-undo" size={20} color={colors.text.primary} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -240,7 +244,7 @@ export function RoutePlanner({ initialRegion, onSaveRoute, initialWaypoints }: R
                 onPress={handleClear}
                 disabled={waypoints.length === 0}
               >
-                <Ionicons name="trash" size={20} color={COLORS.error} />
+                <Ionicons name="trash" size={20} color={colors.error} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -268,7 +272,7 @@ export function RoutePlanner({ initialRegion, onSaveRoute, initialWaypoints }: R
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -282,7 +286,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     padding: SPACING.xl,
     borderRadius: BORDER_RADIUS.lg,
     alignItems: 'center',
@@ -294,7 +298,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: SPACING.md,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     fontSize: TYPOGRAPHY.sizes.md,
   },
   controls: {
@@ -304,7 +308,7 @@ const styles = StyleSheet.create({
     right: SPACING.md,
   },
   distanceCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.md,
@@ -317,17 +321,17 @@ const styles = StyleSheet.create({
   },
   distanceLabel: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   distanceValue: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
+    color: colors.primary,
     marginVertical: SPACING.xs,
   },
   waypointCount: {
     fontSize: TYPOGRAPHY.sizes.xs,
-    color: COLORS.text.light,
+    color: colors.text.light,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -348,15 +352,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   primaryButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   secondaryButton: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     flex: 0,
     paddingHorizontal: SPACING.lg,
   },
   successButton: {
-    backgroundColor: COLORS.success,
+    backgroundColor: colors.success,
   },
   buttonText: {
     color: '#FFF',
@@ -365,12 +369,12 @@ const styles = StyleSheet.create({
   },
   instructions: {
     marginTop: SPACING.md,
-    backgroundColor: COLORS.primary + '20',
+    backgroundColor: colors.primary + '20',
     padding: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
   },
   instructionsText: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontSize: TYPOGRAPHY.sizes.sm,
     textAlign: 'center',
   },
@@ -381,17 +385,17 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#FFF',
   },
   startMarker: {
-    backgroundColor: COLORS.secondary,
+    backgroundColor: colors.secondary,
   },
   endMarker: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: colors.accent,
   },
   markerText: {
     color: '#FFF',
@@ -402,6 +406,9 @@ const styles = StyleSheet.create({
 
 // Screen wrapper component that handles navigation integration
 export default function RoutePlanningScreen({ navigation, route }: any) {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const { user } = useAuth();
   const [routeName, setRouteName] = useState('');
   const [hasUserLocation, setHasUserLocation] = useState(false);

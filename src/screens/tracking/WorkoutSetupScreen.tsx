@@ -14,7 +14,8 @@ import { RouteService } from '../../services/firebase/route.service';
 import { RouteData } from '../../types/route';
 import { WorkoutType } from '../../types/workout';
 import { formatDistance } from '../../utils/routeUtils';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getColors } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface WorkoutSetupScreenProps {
   navigation: any;
@@ -22,6 +23,9 @@ interface WorkoutSetupScreenProps {
 
 export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenProps) {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [workoutType, setWorkoutType] = useState<WorkoutType>('running');
   const [selectedRoute, setSelectedRoute] = useState<RouteData | null>(null);
   const [routes, setRoutes] = useState<RouteData[]>([]);
@@ -72,7 +76,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
             <Ionicons 
               name="fitness" 
               size={32} 
-              color={workoutType === 'running' ? COLORS.primary : COLORS.text.secondary} 
+              color={workoutType === 'running' ? colors.primary : colors.text.secondary} 
             />
             <Text style={[
               styles.typeLabel,
@@ -93,7 +97,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
             <Ionicons 
               name="walk" 
               size={32} 
-              color={workoutType === 'walking' ? COLORS.primary : COLORS.text.secondary} 
+              color={workoutType === 'walking' ? colors.primary : colors.text.secondary} 
             />
             <Text style={[
               styles.typeLabel,
@@ -114,11 +118,11 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
+            <ActivityIndicator size="large" color={colors.primary} />
           </View>
         ) : routes.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="map-outline" size={48} color={COLORS.text.light} />
+            <Ionicons name="map-outline" size={48} color={colors.text.light} />
             <Text style={styles.emptyText}>No saved routes yet</Text>
             <Text style={styles.emptySubtext}>
               Create routes in the Routes tab to use them for workouts
@@ -136,7 +140,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
               activeOpacity={0.7}
             >
               <View style={styles.routeIcon}>
-                <Ionicons name="navigate" size={24} color={COLORS.primary} />
+                <Ionicons name="navigate" size={24} color={colors.primary} />
               </View>
               <View style={styles.routeInfo}>
                 <Text style={styles.routeName}>Free Run</Text>
@@ -145,7 +149,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
                 </Text>
               </View>
               {!selectedRoute && (
-                <Ionicons name="checkmark-circle" size={24} color={COLORS.primary} />
+                <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
               )}
             </TouchableOpacity>
 
@@ -161,7 +165,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
                 activeOpacity={0.7}
               >
                 <View style={styles.routeIcon}>
-                  <Ionicons name="map" size={24} color={COLORS.primary} />
+                  <Ionicons name="map" size={24} color={colors.primary} />
                 </View>
                 <View style={styles.routeInfo}>
                   <Text style={styles.routeName}>{route.name}</Text>
@@ -170,7 +174,7 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
                   </Text>
                 </View>
                 {selectedRoute?.id === route.id && (
-                  <Ionicons name="checkmark-circle" size={24} color={COLORS.primary} />
+                  <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -191,10 +195,10 @@ export default function WorkoutSetupScreen({ navigation }: WorkoutSetupScreenPro
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   contentContainer: {
     padding: SPACING.lg,
@@ -206,13 +210,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontFamily: TYPOGRAPHY.fonts.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.xs,
   },
   sectionSubtitle: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginBottom: SPACING.md,
   },
   typeRow: {
@@ -223,23 +227,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: SPACING.lg,
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   typeCardSelected: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '10',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
   },
   typeLabel: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginTop: SPACING.sm,
   },
   typeLabelSelected: {
-    color: COLORS.primary,
+    color: colors.primary,
   },
   loadingContainer: {
     padding: SPACING.xxl,
@@ -252,13 +256,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginTop: SPACING.md,
   },
   emptySubtext: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.light,
+    color: colors.text.light,
     marginTop: SPACING.xs,
     textAlign: 'center',
   },
@@ -266,21 +270,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: SPACING.md,
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 2,
     borderColor: 'transparent',
     marginBottom: SPACING.sm,
   },
   routeCardSelected: {
-    borderColor: COLORS.primary,
-    backgroundColor: COLORS.primary + '10',
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
   },
   routeIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: COLORS.primary + '20',
+    backgroundColor: colors.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
@@ -291,24 +295,24 @@ const styles = StyleSheet.create({
   routeName: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   routeDescription: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   routeStats: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingVertical: SPACING.lg,
     borderRadius: BORDER_RADIUS.lg,
     gap: SPACING.sm,

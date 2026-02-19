@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SPACING, TYPOGRAPHY, getColors } from "../../constants/theme";
+import { useTheme } from "../../contexts/ThemeContext";
 import { StoreService, Pack } from "../../services/store/store.service";
 
 type TabType = 'premium' | 'training' | 'diet';
@@ -36,6 +38,9 @@ const FEATURES = [
 ];
 
 export default function PremiumPlanScreen() {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [activeTab, setActiveTab] = useState<TabType>('premium');
 
   const trainingPacks = StoreService.getTrainingPacks();
@@ -246,42 +251,42 @@ export default function PremiumPlanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f3f3",
+    backgroundColor: colors.background,
   },
   header: {
     padding: 24,
-    alignItems: "center",
+    alignItems: 'center',
   },
   title: {
     fontSize: 32,
-    fontWeight: "800",
-    color: "#121212",
+    fontWeight: '800',
+    color: colors.text.primary,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#9c9c9c",
-    textAlign: "center",
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
   featuresContainer: {
     paddingHorizontal: 24,
     marginTop: 16,
   },
   featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   featureIcon: {
-    color: "#4CAF50",
+    color: colors.primary,
     marginRight: 10,
     fontSize: 16,
   },
   featureText: {
-    color: "#202020",
+    color: colors.text.primary,
     fontSize: 15,
   },
   plansContainer: {
@@ -289,41 +294,41 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   planCard: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#2A2A30",
+    borderColor: colors.border,
   },
   highlightedPlan: {
-    borderColor: "#4CAF50",
-    backgroundColor: "#ceecce",
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
   },
   badge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#4CAF50",
-    color: "#0B0B0F",
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primary,
+    color: colors.text.primary,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: '700',
     marginBottom: 12,
   },
   planTitle: {
     fontSize: 20,
-    fontWeight: "700",
-    color: "#303030",
+    fontWeight: '700',
+    color: colors.text.primary,
   },
   planPrice: {
     fontSize: 18,
-    color: "#151515",
+    color: colors.text.primary,
     marginTop: 8,
   },
   planSubtitle: {
     fontSize: 14,
-    color: "#4CAF50",
+    color: colors.primary,
     marginTop: 4,
   },
   planButton: {
@@ -331,31 +336,31 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#4CAF50",
-    alignItems: "center",
+    borderColor: colors.primary,
+    alignItems: 'center',
   },
   highlightedButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: colors.primary,
   },
   planButtonText: {
-    color: "#4CAF50",
+    color: colors.primary,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: '700',
   },
   highlightedButtonText: {
-    color: "#0B0B0F",
+    color: colors.text.primary,
   },
   footerText: {
-    textAlign: "center",
-    color: "#888",
+    textAlign: 'center',
+    color: colors.text.secondary,
     fontSize: 12,
     marginVertical: 24,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
@@ -366,12 +371,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeTab: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
   },
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#888',
+    color: colors.text.secondary,
   },
   activeTabText: {
     color: '#fff',
@@ -381,7 +386,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   packCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -399,7 +404,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 12,
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -410,16 +415,16 @@ const styles = StyleSheet.create({
   packTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#303030',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   packDuration: {
     fontSize: 13,
-    color: '#888',
+    color: colors.text.secondary,
   },
   packDescription: {
     fontSize: 14,
-    color: '#555',
+    color: colors.text.secondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -431,12 +436,12 @@ const styles = StyleSheet.create({
   packPrice: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#4CAF50',
+    color: colors.primary,
   },
   buyButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,

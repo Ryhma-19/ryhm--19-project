@@ -10,7 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function SignupScreen({ navigation }: any) {
   const [name, setName] = useState('');
@@ -19,6 +20,9 @@ export default function SignupScreen({ navigation }: any) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
 
   const handleSignup = async () => {
     if (!name || !email || !password || !confirmPassword) {
@@ -60,6 +64,7 @@ export default function SignupScreen({ navigation }: any) {
           placeholder="Full Name"
           value={name}
           onChangeText={setName}
+          placeholderTextColor={colors.text.secondary}
         />
 
         <TextInput
@@ -69,6 +74,7 @@ export default function SignupScreen({ navigation }: any) {
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
+          placeholderTextColor={colors.text.secondary}
         />
 
         <TextInput
@@ -77,6 +83,7 @@ export default function SignupScreen({ navigation }: any) {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          placeholderTextColor={colors.text.secondary}
         />
 
         <TextInput
@@ -85,6 +92,7 @@ export default function SignupScreen({ navigation }: any) {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
+          placeholderTextColor={colors.text.secondary}
         />
 
         <TouchableOpacity
@@ -110,10 +118,10 @@ export default function SignupScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -123,25 +131,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.sm,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginBottom: SPACING.xl,
   },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: SPACING.md,
     marginBottom: SPACING.md,
     fontSize: TYPOGRAPHY.sizes.md,
+    color: colors.text.primary,
   },
   button: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     borderRadius: 8,
     padding: SPACING.md,
     alignItems: 'center',
@@ -161,10 +170,10 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   linkTextBold: {
-    color: COLORS.primary,
+    color: colors.primary,
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
 });

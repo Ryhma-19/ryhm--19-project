@@ -60,19 +60,33 @@ export interface WeatherCondition {
   isExtreme?: boolean; // For warnings
 }
 
-export const ICONS = {
-  duration: "⏱️",
-  pace: "🏃",
-  distance: "🚶",
-  steps: "👟",
-  amount: "💪",
-} as const;
+export interface AchievementStats {
+  amount: number;
+  distance: number; // meters
+  steps: number;
+  duration: number; // seconds
+  averagePace: number; // min/km
+  longestRun: number; // meters
+  currentStreak: number; // days
+  longestStreak: number; // days
+}
 
-export type IconKey = keyof typeof ICONS;
+export type BadgeType = keyof AchievementStats
+
+export const ICONS: Record<BadgeType, string> = {
+  amount: "💪",
+  distance: "🏃",
+  steps: "👟",
+  duration: "⏱️",
+  averagePace: "⚡",
+  longestRun: "📏",
+  currentStreak: "🔥",
+  longestStreak: "🏆",
+};
 
 export interface Achievement {
   id: string;
-  type: IconKey;
+  type: BadgeType;
   title: string;
   milestones: number[] | null;
   progress: number;

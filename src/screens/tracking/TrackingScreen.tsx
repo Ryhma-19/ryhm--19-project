@@ -1,13 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
 
 export default function TrackingScreen({ navigation }: any) {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Ionicons name="fitness" size={80} color={COLORS.primary} />
+        <Ionicons name="fitness" size={80} color={colors.primary} />
         <Text style={styles.title}>Ready to Work Out?</Text>
         <Text style={styles.subtitle}>
           Track your runs and walks with GPS
@@ -43,10 +47,10 @@ export default function TrackingScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -57,21 +61,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontFamily: TYPOGRAPHY.fonts.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginTop: SPACING.lg,
     marginBottom: SPACING.sm,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: SPACING.xl,
   },
   startButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
     borderRadius: 12,
@@ -105,6 +109,6 @@ historyButtonText: {
   placeholderText: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.light,
+    color: colors.text.light,
   },
 });

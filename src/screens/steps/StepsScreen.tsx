@@ -11,10 +11,11 @@ import {
 } from 'react-native';
 import { useSteps } from '../../contexts/steps/StepsContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { StepsService } from '../../services/steps/stepsService';
 import { WeeklyStepsChart } from '../../components/common/WeeklyStepsChart';
 import { MonthlyStepsChart } from '../../components/common/MonthlyStepsChart';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getColors, COLORS } from '../../constants/theme';
 import { WeeklyStepsData, MonthlyStepsData } from '../../types/index';
 
 type ViewType = 'daily' | 'weekly' | 'monthly';
@@ -22,6 +23,9 @@ type ViewType = 'daily' | 'weekly' | 'monthly';
 const StepsScreen: React.FC = () => {
   const { steps, today, loading, dailyGoal, setDailyGoal, goalReached } = useSteps();
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [viewType, setViewType] = useState<ViewType>('daily');
   const [weeklyData, setWeeklyData] = useState<WeeklyStepsData | null>(null);
   const [monthlyData, setMonthlyData] = useState<MonthlyStepsData | null>(null);
@@ -75,7 +79,7 @@ const StepsScreen: React.FC = () => {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -153,7 +157,7 @@ const StepsScreen: React.FC = () => {
         <>
           {/* Weekly Chart */}
           {loadingData ? (
-            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+            <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
           ) : weeklyData ? (
             <WeeklyStepsChart data={weeklyData} dailyGoal={dailyGoal} />
           ) : (
@@ -168,7 +172,7 @@ const StepsScreen: React.FC = () => {
         <>
           {/* Monthly Chart */}
           {loadingData ? (
-            <ActivityIndicator size="large" color={COLORS.primary} style={styles.loader} />
+            <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
           ) : monthlyData ? (
             <MonthlyStepsChart data={monthlyData} dailyGoal={dailyGoal} />
           ) : (
@@ -187,6 +191,7 @@ const StepsScreen: React.FC = () => {
             <TextInput
               style={styles.goalInput}
               placeholder="Enter steps"
+              placeholderTextColor={colors.text.secondary}
               keyboardType="number-pad"
               value={goalInput}
               onChangeText={setGoalInput}
@@ -214,7 +219,7 @@ const StepsScreen: React.FC = () => {
 
 export default StepsScreen;
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   center: {
     flex: 1,
     justifyContent: 'center',
@@ -223,7 +228,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: SPACING.md,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   viewSelector: {
     flexDirection: 'row',
@@ -235,26 +240,26 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     alignItems: 'center',
   },
   viewButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   viewButtonText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '500',
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   viewButtonTextActive: {
-    color: COLORS.surface,
+    color: colors.surface,
     fontWeight: '600',
   },
   card: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -266,19 +271,19 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginBottom: SPACING.xs,
   },
   label: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.md,
   },
   steps: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontWeight: 'bold',
-    color: COLORS.primary,
+    color: colors.primary,
     marginBottom: SPACING.lg,
   },
   progressContainer: {
@@ -286,7 +291,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 12,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     borderRadius: BORDER_RADIUS.full,
     overflow: 'hidden',
     marginBottom: SPACING.sm,
@@ -297,10 +302,10 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   goalReachedBadge: {
-    backgroundColor: `${COLORS.success}20`,
+    backgroundColor: `${colors.success}20`,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
@@ -309,30 +314,30 @@ const styles = StyleSheet.create({
   goalReachedText: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: '600',
-    color: COLORS.success,
+    color: colors.success,
   },
   setGoalButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     borderRadius: BORDER_RADIUS.md,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     alignItems: 'center',
   },
   setGoalButtonText: {
-    color: COLORS.surface,
+    color: colors.surface,
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '600',
   },
   periodTitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.sm,
   },
   periodTotal: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '600',
-    color: COLORS.primary,
+    color: colors.primary,
     marginBottom: SPACING.lg,
   },
   daysList: {
@@ -345,24 +350,24 @@ const styles = StyleSheet.create({
   },
   dayDate: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     width: 90,
   },
   dayBarContainer: {
     flex: 1,
     height: 8,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     borderRadius: BORDER_RADIUS.full,
     overflow: 'hidden',
   },
   dayBar: {
     height: '100%',
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   daySteps: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontWeight: '500',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     width: 50,
     textAlign: 'right',
   },
@@ -370,18 +375,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
     paddingBottom: SPACING.lg,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   weekTitle: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.xs,
   },
   weekTotal: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontWeight: '500',
-    color: COLORS.primary,
+    color: colors.primary,
     marginBottom: SPACING.md,
   },
   monthDayItem: {
@@ -392,20 +397,20 @@ const styles = StyleSheet.create({
   },
   monthDayDate: {
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     width: 70,
   },
   monthDayBar: {
     flex: 1,
     height: 6,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     borderRadius: BORDER_RADIUS.full,
     overflow: 'hidden',
   },
   monthDaySteps: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontWeight: '500',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     width: 45,
     textAlign: 'right',
   },
@@ -414,7 +419,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: TYPOGRAPHY.sizes.md,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     textAlign: 'center',
     paddingVertical: SPACING.xl,
   },
@@ -430,7 +435,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.lg,
     width: '80%',
@@ -439,17 +444,17 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.md,
   },
   goalInput: {
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md,
     fontSize: TYPOGRAPHY.sizes.md,
     marginBottom: SPACING.lg,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
   },
   modalButtons: {
     flexDirection: 'row',
@@ -462,19 +467,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
   },
   cancelButtonText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '600',
-    color: COLORS.text.primary,
+    color: colors.text.primary,
   },
   confirmButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
   },
   confirmButtonText: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '600',
-    color: COLORS.surface,
+    color: colors.surface,
   },
 });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Pressable, TextInput, Switch, Button, Alert } from 'react-native';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
+import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -11,6 +12,9 @@ import { auth } from '../../services/firebase/config';
 
 export default function PasswordUpdateScreen({ navigation }: any) {
   const user = auth.currentUser;
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [loading, setLoading] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -52,6 +56,7 @@ export default function PasswordUpdateScreen({ navigation }: any) {
         placeholder=""
         value={oldPassword}
         onChangeText={setOldPassword}
+        placeholderTextColor={colors.text.secondary}
         style={styles.input}
         secureTextEntry
       />
@@ -60,6 +65,7 @@ export default function PasswordUpdateScreen({ navigation }: any) {
         placeholder=""
         value={newPassword}
         onChangeText={setNewPassword}
+        placeholderTextColor={colors.text.secondary}
         style={styles.input}
         secureTextEntry
       />
@@ -68,6 +74,7 @@ export default function PasswordUpdateScreen({ navigation }: any) {
         placeholder=""
         value={confirmedNewPassword}
         onChangeText={setConfirmedNewPassword}
+        placeholderTextColor={colors.text.secondary}
         style={styles.input}
         secureTextEntry
       />
@@ -85,32 +92,32 @@ export default function PasswordUpdateScreen({ navigation }: any) {
   );
 }
 
-
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
     padding: SPACING.lg,
   },
   subtitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginBottom: SPACING.xs,
   },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     width: '100%',
-    borderColor: COLORS.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: SPACING.md,
     marginBottom: SPACING.md,
     fontSize: TYPOGRAPHY.sizes.md,
+    color: colors.text.primary,
   },
   button: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     borderRadius: 8,
     padding: SPACING.md,
     alignItems: 'center',
@@ -122,7 +129,7 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.weights.semibold,
   },
   passwordButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     borderRadius: 8,
     padding: SPACING.md,
     alignItems: 'center',

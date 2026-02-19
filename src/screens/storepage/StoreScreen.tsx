@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SPACING, TYPOGRAPHY, getColors } from "../../constants/theme";
+import { useTheme } from "../../contexts/ThemeContext";
 import { StoreService, Pack } from "../../services/store/store.service";
 
 type TabType = 'training' | 'diet';
 
 export default function StoreScreen() {
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [activeTab, setActiveTab] = useState<TabType>('training');
 
   const trainingPacks = StoreService.getTrainingPacks();
@@ -124,16 +129,16 @@ export default function StoreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f3f3",
+    backgroundColor: colors.background,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.border,
   },
   tab: {
     flex: 1,
@@ -144,12 +149,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   activeTab: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
   },
   tabText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#888',
+    color: colors.text.secondary,
   },
   activeTabText: {
     color: '#fff',
@@ -159,7 +164,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   packCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 12,
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -188,16 +193,16 @@ const styles = StyleSheet.create({
   packTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#303030',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   packDuration: {
     fontSize: 13,
-    color: '#888',
+    color: colors.text.secondary,
   },
   packDescription: {
     fontSize: 14,
-    color: '#555',
+    color: colors.text.secondary,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -209,12 +214,12 @@ const styles = StyleSheet.create({
   packPrice: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#4CAF50',
+    color: colors.primary,
   },
   buyButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,

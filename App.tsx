@@ -4,6 +4,7 @@ import { View, Text } from 'react-native';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { StepsProvider } from './src/contexts/steps/StepsContext';
 import { MotionProvider } from './src/contexts/motion/MotionContext';
+import { ThemeProvider } from './src/contexts/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 //ErrorBoundary kept from testing
@@ -36,14 +37,16 @@ class ErrorBoundary extends React.Component<
 export default function App() {
   return (
     <ErrorBoundary>
+      <ThemeProvider>
       <AuthProvider>
-        <StepsProvider>
-          <MotionProvider>
-            <StatusBar style="auto" />
-            <AppNavigator />
-          </MotionProvider>
-        </StepsProvider>
-      </AuthProvider>
+          <StepsProvider>
+            <MotionProvider>
+              <StatusBar style="auto" />
+              <AppNavigator />
+            </MotionProvider>
+          </StepsProvider>
+        </AuthProvider>
     </ErrorBoundary>
+    </ThemeProvider>
   );
 }

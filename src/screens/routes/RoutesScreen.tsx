@@ -9,15 +9,19 @@ import {
   Text,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { RouteService } from '../../services/firebase/route.service';
 import { RouteData } from '../../types/route';
 import { RouteCard } from '../../components/routes/RouteCard';
 import EmptyRoutes from '../../components/routes/EmptyRoutes';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
 
 export default function RoutesScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const [routes, setRoutes] = useState<RouteData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -146,8 +150,8 @@ export default function RoutesScreen({ navigation }: any) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -167,20 +171,20 @@ export default function RoutesScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   loadingText: {
     fontSize: 16,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     fontFamily: TYPOGRAPHY.fonts.regular,
   },
   emptyContainer: {
@@ -197,7 +201,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: COLORS.primary,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,

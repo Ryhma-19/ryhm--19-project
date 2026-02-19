@@ -2,14 +2,18 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useWeather } from '../../hooks/useWeather';
 import { WeatherCard } from '../../components/common/WeatherCard';
 import { MotionCard } from '../../components/common/MotionCard';
 import { DailyStepsCard } from '../../components/common/DailyStepsCard';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, getColors } from '../../constants/theme';
 
 export default function HomeScreen({ navigation }: any) {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const { weather, loading, error, refresh } = useWeather();
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -60,12 +64,12 @@ export default function HomeScreen({ navigation }: any) {
         
         <View style={styles.actionsGrid}>
           <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="play-circle" size={32} color={COLORS.primary} />
+            <Ionicons name="play-circle" size={32} color={colors.primary} />
             <Text style={styles.actionText}>Start Workout</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="map" size={32} color={COLORS.secondary} />
+            <Ionicons name="map" size={32} color={colors.secondary} />
             <Text style={styles.actionText}>Plan Route</Text>
           </TouchableOpacity>
         </View>
@@ -100,10 +104,10 @@ export default function HomeScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   header: {
     padding: SPACING.lg,
@@ -111,12 +115,12 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: TYPOGRAPHY.sizes.lg,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   userName: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
   },
   section: {
     padding: SPACING.lg,
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.sizes.lg,
     fontWeight: TYPOGRAPHY.weights.semibold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.md,
   },
   actionsGrid: {
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     flex: 1,
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: SPACING.lg,
     alignItems: 'center',
@@ -146,11 +150,11 @@ const styles = StyleSheet.create({
   actionText: {
     marginTop: SPACING.sm,
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     fontWeight: TYPOGRAPHY.weights.medium,
   },
   statsCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: SPACING.lg,
     flexDirection: 'row',
@@ -167,15 +171,15 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: TYPOGRAPHY.sizes.xl,
     fontWeight: TYPOGRAPHY.weights.bold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
   statLabel: {
     marginTop: SPACING.xs,
     fontSize: TYPOGRAPHY.sizes.sm,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   statDivider: {
     width: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
   },
 });

@@ -1,4 +1,6 @@
-export const COLORS = {
+export type ThemeType = 'normal' | 'dark' | 'light';
+
+const NORMAL_COLORS = {
   primary: '#4A90E2',      
   secondary: '#50C878',    
   accent: '#FF6B6B',       
@@ -14,6 +16,53 @@ export const COLORS = {
   warning: '#F39C12',
   success: '#27AE60',
 };
+
+const DARK_COLORS = {
+  primary: '#5B9FFF',      
+  secondary: '#62E89B',    
+  accent: '#FF8A8A',       
+  background: '#1A1A1A',   
+  surface: '#2D2D2D',      
+  text: {
+    primary: '#E8E8E8',
+    secondary: '#A8A8A8',
+    light: '#6B6B6B',
+  },
+  border: '#404040',
+  error: '#FF6B6B',
+  warning: '#FFB84D',
+  success: '#52D47A',
+};
+
+const LIGHT_COLORS = {
+  primary: '#2962FF',      
+  secondary: '#2ECC71',    
+  accent: '#FF4757',       
+  background: '#FFFFFF',   
+  surface: '#F8F8F8',      
+  text: {
+    primary: '#1A1A1A',
+    secondary: '#5A5A5A',
+    light: '#A0A0A0',
+  },
+  border: '#EBEBEB',
+  error: '#E74C3C',
+  warning: '#E67E22',
+  success: '#27AE60',
+};
+
+export const getColors = (theme: ThemeType = 'normal') => {
+  switch (theme) {
+    case 'dark':
+      return DARK_COLORS;
+    case 'light':
+      return LIGHT_COLORS;
+    default:
+      return NORMAL_COLORS;
+  }
+};
+
+export const COLORS = NORMAL_COLORS;
 
 export const SPACING = {
   xs: 4,

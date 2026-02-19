@@ -26,7 +26,8 @@ import {
   calculateElevationGain,
   suggestWorkoutName,
 } from '../../utils/workoutUtils';
-import { COLORS, SPACING, TYPOGRAPHY, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING, TYPOGRAPHY, BORDER_RADIUS, getColors, COLORS } from '../../constants/theme';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface WorkoutSummaryScreenProps {
   navigation: any;
@@ -45,6 +46,9 @@ const FEELINGS: { value: FeelingType; label: string; icon: string; color: string
 
 export default function WorkoutSummaryScreen({ navigation, route }: WorkoutSummaryScreenProps) {
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const colors = getColors(theme);
+  const styles = createStyles(colors);
   const { 
     workoutType,
     routeId,
@@ -225,7 +229,7 @@ console.log('Rendering, checking all text values:', {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="checkmark-circle" size={64} color={COLORS.success} />
+          <Ionicons name="checkmark-circle" size={64} color={colors.success} />
           <Text style={styles.headerTitle}>Workout Complete!</Text>
           <Text style={styles.headerSubtitle}>{suggestedName || 'Workout'}</Text>
         </View>
@@ -368,7 +372,7 @@ console.log('Rendering, checking all text values:', {
           <TextInput
             style={styles.notesInput}
             placeholder="How was your workout? Any thoughts?"
-            placeholderTextColor={COLORS.text.light}
+            placeholderTextColor={colors.text.light}
             multiline
             numberOfLines={4}
             value={notes}
@@ -411,10 +415,10 @@ console.log('Rendering, checking all text values:', {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof getColors>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -430,17 +434,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: TYPOGRAPHY.sizes.xxl,
     fontFamily: TYPOGRAPHY.fonts.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginTop: SPACING.md,
   },
   headerSubtitle: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
     marginTop: SPACING.xs,
   },
   statsCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: SPACING.lg,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
@@ -460,22 +464,22 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: TYPOGRAPHY.sizes.xl,
     fontFamily: TYPOGRAPHY.fonts.bold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   statLabel: {
     fontSize: TYPOGRAPHY.sizes.xs,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   statDivider: {
     width: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: colors.border,
     marginHorizontal: SPACING.sm,
   },
   additionalStats: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: SPACING.md,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
@@ -485,17 +489,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   additionalStatLabel: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.regular,
-    color: COLORS.text.secondary,
+    color: colors.text.secondary,
   },
   additionalStatValue: {
     fontSize: TYPOGRAPHY.sizes.sm,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
   },
   section: {
     marginBottom: SPACING.lg,
@@ -503,11 +507,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
     marginBottom: SPACING.md,
   },
   splitsContainer: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: SPACING.md,
     overflow: 'hidden',
   },
@@ -516,17 +520,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: colors.border,
   },
   splitKm: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.medium,
-    color: COLORS.text.primary,
+    color: colors.text.primary,
   },
   splitPace: {
     fontSize: TYPOGRAPHY.sizes.md,
     fontFamily: TYPOGRAPHY.fonts.semiBold,
-    color: COLORS.primary,
+    color: colors.primary,
   },
   feelingsRow: {
     flexDirection: 'row',
@@ -537,7 +541,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: SPACING.sm,
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.surface,
     borderRadius: SPACING.md,
     borderWidth: 2,
     borderColor: 'transparent',
