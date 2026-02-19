@@ -1,4 +1,4 @@
-export type WorkoutType = 'running' | 'walking'; //add cycling eventually
+export type WorkoutType = 'running' | 'walking';
 
 export type FeelingType = 'great' | 'good' | 'okay' | 'tired' | 'exhausted';
 
@@ -76,10 +76,9 @@ export interface LiveWorkoutStats {
   currentPace: number;
   averagePace: number;
   currentSpeed: number;
+  coordinates: GPSPoint[];
   steps: number;
   currentCadence: number;
-  isPaused: boolean;
-  coordinates: GPSPoint[];
 }
 
 export interface WorkoutAnalytics {

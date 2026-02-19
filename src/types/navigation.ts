@@ -41,7 +41,7 @@ export type TrackingStackParamList = {
       averageCadence: number;
       maxCadence: number;
     };
-    startTime: Date;
+    startTime: string;
   };
   WorkoutList: undefined;
   WorkoutDetail: {

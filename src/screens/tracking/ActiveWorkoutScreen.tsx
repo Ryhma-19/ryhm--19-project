@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useWorkoutTrackingWithPedometer} from '../../hooks/useWorkoutTrackingWithPedometer';
+import { useWorkoutTrackingWithPedometer } from '../../hooks/useWorkoutTrackingWithPedometer';
 import { formatDuration, formatDistance, formatPace } from '../../utils/workoutUtils';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 import { WorkoutType } from '../../types/workout';
@@ -41,19 +41,29 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
   } = useWorkoutTrackingWithPedometer();
 
   const [isStarted, setIsStarted] = useState(false);
+  const startTimeRef = useRef<Date | null>(null);
+  const isStopping = useRef(false);
 
-  // Auto-start tracking on mount
   useEffect(() => {
     handleStartWorkout();
   }, []);
 
-  // Handle starting the workout
+  // Handlers for starting, pausing and resuming
   const handleStartWorkout = async () => {
+    console.log('Starting workout...');
+    
     const started = await startTracking();
+    
     if (started) {
+      startTimeRef.current = new Date();
       setIsStarted(true);
-      console.log('Workout started:', { workoutType, routeId, routeName });
+      
+      console.log('Workout started successfully');
+      console.log('  - Start time:', startTimeRef.current.toISOString());
+      console.log('  - Type:', workoutType);
+      console.log('  - Route:', routeName || 'Free run');
     } else {
+      console.error('Failed to start tracking');
       Alert.alert(
         'Unable to Start',
         'Could not start workout tracking. Please check your location permissions.',
@@ -67,16 +77,16 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     }
   };
 
-  // Handle pause/resume
   const handlePauseResume = () => {
     if (isPaused) {
+      console.log('▶️ Resuming workout...');
       resumeTracking();
     } else {
+      console.log('⏸️ Pausing workout...');
       pauseTracking();
     }
   };
 
-  // Handle finish workout
   const handleFinishWorkout = () => {
     // Require minimum distance, currently set to 100m
     if (stats.distance < 100) {
@@ -104,18 +114,92 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
           text: 'Finish',
           style: 'default',
           onPress: async () => {
+            if (isStopping.current) {
+              console.warn('Already stopping, ignoring duplicate call');
+              return;
+            }
+
+            isStopping.current = true;
+
             try {
+              console.log('Stopping workout...');
+              console.log('  - Current stats:', {
+                distance: stats.distance,
+                elapsedTime: stats.elapsedTime,
+                coordinates: stats.coordinates.length,
+                steps: stats.steps,
+              });
+
               const finalData = await stopTracking();
               
-              // Navi to summary screen
-              navigation.replace('WorkoutSummary', {
-                workoutType,
-                routeId,
-                routeName,
-                finalData,
-                startTime: new Date(Date.now() - stats.elapsedTime * 1000),
+              console.log('Final data received:', {
+                gpsPoints: finalData.gpsPoints.length,
+                duration: finalData.duration,
+                pausedDuration: finalData.pausedDuration,
+                steps: finalData.steps,
+                averageCadence: finalData.averageCadence,
+                maxCadence: finalData.maxCadence,
               });
+
+              if (finalData.gpsPoints.length === 0 && finalData.duration === 0) {
+                isStopping.current = false;
+                Alert.alert(
+                  'No Data Recorded',
+                  'The workout completed but no GPS data was captured. This may be due to GPS signal issues.',
+                  [
+                    { text: 'Try Again', onPress: () => navigation.navigate('TrackingHome') },
+                  ]
+                );
+                return;
+              }
+
+              if (!startTimeRef.current) {
+                console.error('Start time not recorded! Using fallback...');
+                startTimeRef.current = new Date(Date.now() - stats.elapsedTime * 1000);
+              }
+
+              console.log('Navigating to summary with start time:', startTimeRef.current.toISOString());
+              const serializedFinalData = {
+                ...finalData,
+                gpsPoints: finalData.gpsPoints.map(point => ({
+                  ...point,
+                  timestamp: point.timestamp instanceof Date 
+                    ? point.timestamp.getTime() 
+                    : point.timestamp,
+                })),
+              };
+
+              console.log('Navigation params:', {
+                workoutType,
+                routeId: routeId || 'none',
+                routeName: routeName || 'none',
+                gpsPoints: serializedFinalData.gpsPoints.length,
+                duration: serializedFinalData.duration,
+                startTimeISO: startTimeRef.current.toISOString(),
+              });
+
+              try {
+                // Navigate to summary screen
+                navigation.replace('WorkoutSummary', {
+                  workoutType,
+                  routeId,
+                  routeName,
+                  finalData: serializedFinalData,
+                  startTime: startTimeRef.current.toISOString(),
+                });
+                
+                console.log('Navigation.replace() called successfully');
+              } catch (navError) {
+                console.error('Navigation error:', navError);
+                isStopping.current = false;
+                Alert.alert(
+                  'Navigation Error',
+                  'Failed to navigate to summary. Error: ' + (navError instanceof Error ? navError.message : String(navError)),
+                  [{ text: 'OK' }]
+                );
+              }
             } catch (error) {
+              isStopping.current = false;
               console.error('Error finishing workout:', error);
               Alert.alert('Error', 'Failed to finish workout. Please try again.');
             }
@@ -125,13 +209,11 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     );
   };
 
-  // Handle cancelling workout
   const handleCancelWorkout = () => {
     const distanceKm = (stats.distance / 1000).toFixed(2);
     const canSave = stats.distance >= 100;
 
     if (canSave) {
-      // Workout is within minimum distance requirement, ask to save or discard
       Alert.alert(
         'Cancel Workout?',
         `You've completed ${distanceKm} km. Do you want to save this workout or discard it?`,
@@ -141,6 +223,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
             text: 'Discard',
             style: 'destructive',
             onPress: async () => {
+              console.log('🗑️ Discarding workout...');
               await stopTracking();
               navigation.navigate('TrackingHome');
             },
@@ -163,6 +246,7 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
             text: 'Yes, Cancel',
             style: 'destructive',
             onPress: async () => {
+              console.log('Cancelling short workout...');
               await stopTracking();
               navigation.navigate('TrackingHome');
             },
@@ -172,22 +256,40 @@ export default function ActiveWorkoutScreen({ navigation, route }: ActiveWorkout
     }
   };
 
-  // Prevent accidental back navigation
+  // Prevent accidental navigation
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-      if (!isTracking) {
+      console.log('beforeRemove event fired:', {
+        isTracking,
+        isStopping: isStopping.current,
+        willBlock: isTracking && !isStopping.current,
+      });
+
+      if (!isTracking || isStopping.current) {
+        console.log('Allowing navigation (legitimate finish)');
         return;
       }
 
-      // Prevent default navigation
+      // Block accidental navigation and prompt user
+      console.log('Blocking navigation (accidental back press)');
       e.preventDefault();
 
-      // Show cancel confirmation
       handleCancelWorkout();
     });
 
     return unsubscribe;
-  }, [navigation, isTracking, stopTracking]);
+  }, [navigation, isTracking]);
+
+  // Log for debug
+  useEffect(() => {
+    if (isStarted && stats.coordinates.length > 0) {
+      console.log('GPS update:', {
+        points: stats.coordinates.length,
+        distance: Math.round(stats.distance),
+        elapsedTime: stats.elapsedTime,
+      });
+    }
+  }, [stats.coordinates.length, stats.distance, stats.elapsedTime]);
 
   if (!isStarted) {
     return (
@@ -513,6 +615,6 @@ const styles = StyleSheet.create({
   gpsText: {
     fontSize: TYPOGRAPHY.sizes.xs,
     color: 'rgba(255, 255, 255, 0.5)',
-    fontFamily: TYPOGRAPHY .fonts.regular,
+    fontFamily: TYPOGRAPHY.fonts.regular,
   },
 });

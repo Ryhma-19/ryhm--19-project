@@ -14,6 +14,24 @@ import {
 import { db } from './config';
 import { WorkoutSession, GPSPoint, SplitTime, WorkoutType, FeelingType } from '../../types/workout';
 
+function findUndefinedPaths(value: any, path = 'root'): string[] {
+  if (value === undefined) return [path];
+  if (value === null) return [];
+
+  if (Array.isArray(value)) {
+    return value.flatMap((v, i) => findUndefinedPaths(v, `${path}[${i}]`));
+  }
+
+  if (typeof value === 'object') {
+    return Object.entries(value).flatMap(([k, v]) =>
+      findUndefinedPaths(v, `${path}.${k}`)
+    );
+  }
+
+  return [];
+}
+
+
 export class WorkoutService {
   private static readonly COLLECTION = 'workouts';
 
@@ -58,9 +76,8 @@ export class WorkoutService {
       const workoutData = {
         userId,
         type,
-        name: undefined,
-        routeId: routeId || null,
-        routeName: routeName || null,
+        routeId: routeId ?? null,
+        routeName: routeName ?? null,
         startTime: Timestamp.fromDate(startTime),
         endTime: Timestamp.fromDate(endTime),
         duration,
@@ -73,23 +90,23 @@ export class WorkoutService {
           longitude: point.longitude,
           timestamp: Timestamp.fromDate(point.timestamp),
           speed: point.speed,
-          accuracy: point.accuracy,
-          altitude: point.altitude || null,
+          accuracy: point.accuracy ?? null,
+          altitude: point.altitude ?? null,
         })),
         splits: splits.map((split) => ({
           distance: split.distance,
           time: split.time,
           pace: split.pace,
         })),
-        calories: calories || null,
-        elevationGain: elevationGain || null,
-        notes: notes || null,
-        feeling: feeling || null,
+        calories: calories ?? null,
+        elevationGain: elevationGain ?? null,
+        notes: notes ?? null,
+        feeling: feeling ?? null,
         personalRecords: [],
-        steps: steps || null,
-        averageCadence: averageCadence || null,
-        maxCadence: maxCadence || null,
-        averageSpeed: averageSpeed || null,
+        steps: steps ?? null,
+        averageCadence: averageCadence ?? null,
+        maxCadence: maxCadence ?? null,
+        averageSpeed: averageSpeed ?? null,
         speedData: {
           samples: coordinates.length,
           consistency: speedConsistency,
@@ -97,6 +114,35 @@ export class WorkoutService {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       };
+
+// Debuggers kept
+function stripUndefined(value: any): any {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+
+  if (Array.isArray(value)) {
+    return value
+      .map(stripUndefined)
+      .filter((v) => v !== undefined);
+  }
+
+  if (typeof value === 'object') {
+    const out: any = {};
+    for (const [k, v] of Object.entries(value)) {
+      const cleaned = stripUndefined(v);
+      if (cleaned !== undefined) out[k] = cleaned;
+    }
+    return out;
+  }
+
+  return value;
+}
+
+      const undefinedPaths = findUndefinedPaths(workoutData);
+      if (undefinedPaths.length) {
+      console.error('addDoc payload contains undefined at:', undefinedPaths);
+      }
+      const cleanWorkoutData = stripUndefined(workoutData);
 
       const docRef = await addDoc(collection(db, this.COLLECTION), workoutData);
       console.log('Workout created with ID:', docRef.id);

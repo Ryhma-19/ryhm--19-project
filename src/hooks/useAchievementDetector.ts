@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
-import { WorkoutService } from '../../services/firebase/workout.service';
-import { WorkoutAnalyticsService } from '../../services/analytics/workout-analytics.service';
-import { AchievementData } from '../../types/workout';
+import { WorkoutService } from '../services/firebase/workout.service';
+import { WorkoutAnalyticsService } from '../services/analytics/workout-analytics.service';
+import { AchievementData, WorkoutSession } from '../types/workout';
 
 interface AchievementDetectorProps {
   userId: string;
@@ -10,7 +10,6 @@ interface AchievementDetectorProps {
   onAchievementsDetected?: (achievements: AchievementData[]) => void;
 }
 
-// Detect achievements
 export const useAchievementDetector = ({
   userId,
   newWorkoutId,
@@ -27,31 +26,24 @@ export const useAchievementDetector = ({
       try {
         hasChecked.current = true;
 
-        const allWorkouts = await WorkoutService.getUserWorkouts(userId);
-        
-        // Find the new workout
-        const newWorkout = allWorkouts.find(w => w.id === newWorkoutId);
+        const allWorkouts: WorkoutSession[] = await WorkoutService.getUserWorkouts(userId);
+
+        const newWorkout = allWorkouts.find((w: WorkoutSession) => w.id === newWorkoutId);
         if (!newWorkout) {
           console.warn('New workout not found for achievement detection');
           return;
         }
 
-        const previousWorkouts = allWorkouts.filter(w => w.id !== newWorkoutId);
+        const previousWorkouts = allWorkouts.filter((w: WorkoutSession) => w.id !== newWorkoutId);
 
-        const achievements = WorkoutAnalyticsService.detectAchievements(
+        const achievements: AchievementData[] = WorkoutAnalyticsService.detectAchievements(
           newWorkout,
           previousWorkouts
         );
 
         if (achievements.length > 0) {
           console.log('Achievements detected:', achievements);
-          
-          // Update workout with achievement markers
-          const achievementTypes = achievements.map(a => 
-            `${a.achievementType}_${a.metric}`
-          );
-          
-          // Link to Firestore?
+
           if (onAchievementsDetected) {
             onAchievementsDetected(achievements);
           }
@@ -67,25 +59,19 @@ export const useAchievementDetector = ({
   }, [newWorkoutId, userId, onAchievementsDetected]);
 };
 
-// Achievement alert
-function showAchievementAlert(achievements: AchievementData[]) {
+function showAchievementAlert(achievements: AchievementData[]): void {
   if (achievements.length === 0) return;
 
-  const messages: string[] = [];
-
-  achievements.forEach(achievement => {
-    switch (achievement.achievementType) {
-      case 'personal_record':
-        messages.push(getPersonalRecordMessage(achievement));
-        break;
-      case 'milestone':
-        messages.push(getMilestoneMessage(achievement));
-        break;
-      case 'streak':
-        messages.push(getStreakMessage(achievement));
-        break;
-    }
-  });
+  const messages = achievements
+    .map((achievement: AchievementData) => {
+      switch (achievement.achievementType) {
+        case 'personal_record': return getPersonalRecordMessage(achievement);
+        case 'milestone':       return getMilestoneMessage(achievement);
+        case 'streak':          return getStreakMessage(achievement);
+        default:                return null;
+      }
+    })
+    .filter((msg): msg is string => msg !== null);
 
   Alert.alert(
     '🏆 Achievement Unlocked!',
@@ -96,22 +82,16 @@ function showAchievementAlert(achievements: AchievementData[]) {
 
 function getPersonalRecordMessage(achievement: AchievementData): string {
   const { metric, value, previousBest } = achievement;
-
   switch (metric) {
     case 'distance':
-      return `🏃 New Distance Record!\n${(value / 1000).toFixed(2)} km (previous: ${((previousBest || 0) / 1000).toFixed(2)} km)`;
-    
-    case 'pace':
-      const newPace = formatPace(value);
-      const oldPace = formatPace(previousBest || 0);
-      return `⚡ Fastest Pace!\n${newPace} (previous: ${oldPace})`;
-    
+      return `🏃 New Distance Record!\n${(value / 1000).toFixed(2)} km (previous: ${((previousBest ?? 0) / 1000).toFixed(2)} km)`;
+    case 'pace': {
+      return `⚡ Fastest Pace!\n${formatPace(value)} (previous: ${formatPace(previousBest ?? 0)})`;
+    }
     case 'steps':
-      return `👟 Most Steps!\n${value.toLocaleString()} steps (previous: ${(previousBest || 0).toLocaleString()})`;
-    
+      return `👟 Most Steps!\n${value.toLocaleString()} (previous: ${(previousBest ?? 0).toLocaleString()})`;
     case 'duration':
-      return `⏱️ Longest Workout!\n${formatDuration(value)} (previous: ${formatDuration(previousBest || 0)})`;
-    
+      return `⏱️ Longest Workout!\n${formatDuration(value)} (previous: ${formatDuration(previousBest ?? 0)})`;
     default:
       return `🎯 New Personal Record in ${metric}!`;
   }
@@ -119,32 +99,24 @@ function getPersonalRecordMessage(achievement: AchievementData): string {
 
 function getMilestoneMessage(achievement: AchievementData): string {
   const { metric, value } = achievement;
-
   if (metric === 'distance') {
-    const km = value;
-    if (km === 5) return '🎉 First 5K Complete!';
-    if (km === 10) return '🎉 First 10K Complete!';
-    if (km === 21.1) return '🎉 Half Marathon Complete!';
-    if (km === 42.2) return '🎉 MARATHON COMPLETE!';
-    return `🎉 ${km}km Milestone Reached!`;
+    if (value === 5)    return '🎉 First 5K Complete!';
+    if (value === 10)   return '🎉 First 10K Complete!';
+    if (value === 21.1) return '🎉 Half Marathon Complete!';
+    if (value === 42.2) return '🎉 MARATHON COMPLETE!';
+    return `🎉 ${value}km Milestone Reached!`;
   }
-
   return `🎉 Milestone: ${value} ${metric}!`;
 }
 
 function getStreakMessage(achievement: AchievementData): string {
-  const { value } = achievement;
-  return `🔥 ${value}-Day Workout Streak!`;
+  return `🔥 ${achievement.value}-Day Workout Streak!`;
 }
 
 function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 function formatPace(secondsPerKm: number): string {
@@ -153,10 +125,9 @@ function formatPace(secondsPerKm: number): string {
   return `${minutes}:${String(seconds).padStart(2, '0')}/km`;
 }
 
-// Exporting achievement data
 export function exportAchievementData(achievements: AchievementData[]): string {
   return JSON.stringify({
-    achievements: achievements.map(a => ({
+    achievements: achievements.map((a: AchievementData) => ({
       id: `${a.workoutId}_${a.achievementType}_${a.metric}`,
       workoutId: a.workoutId,
       type: a.achievementType,
