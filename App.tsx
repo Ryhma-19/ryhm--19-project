@@ -46,7 +46,7 @@ export default function App() {
             </MotionProvider>
           </StepsProvider>
         </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
-    </ThemeProvider>
   );
 }
