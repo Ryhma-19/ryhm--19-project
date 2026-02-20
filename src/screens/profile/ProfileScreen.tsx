@@ -61,6 +61,7 @@ export default function ProfileScreen({navigation}: any) {
         <View style={styles.badgeSection}>
           <FlatList
           data={badges}
+          showsVerticalScrollIndicator={false}
           numColumns={3}
           keyExtractor={item => item.id}
           renderItem={({ item }) => <BadgeCard badge={item} variant='profile' />}

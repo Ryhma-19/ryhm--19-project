@@ -6,28 +6,29 @@ const BADGE_IDS = {
     distance: 'longest run',
     duration: 'longest workout',
     // no badges implemented
-    pace:     null,
-    steps:    null,
-    cadence:  null,
+    pace:     'fastest pace',
+    steps:    'most steps in a session',
+    cadence:  'steps per minute',
   },
 
   // no badges implemented
   milestone: {
-    5:    null,
-    10:   null,
-    15:   null,
-    21.1: null,
-    25:   null,
-    30:   null,
-    42.2: null,
+    5:    '5k finisher',
+    10:   '10k runner',
+    15:   '15k challenger',
+    21.1: 'half marathon hero',
+    25:   '25k crusher',
+    30:   '30k endurance beast',
+    42.2: 'marathon finisher',
   } as Record<number, string | null>,
 
   // no badges implemented
   streak: {
-    7:  null,
-    14: null,
-    21: null,
-    30: null,
+    1: '1 streak',
+    7:  '7 streak',
+    14: '14 streak',
+    21: '21 streak',
+    30: '30 streak',
   } as Record<number, string | null>,
 } as const;
 
@@ -61,7 +62,7 @@ export async function saveDetectedBadges(
         `Saving badge "${badgeId}" for ${achievement.achievementType}/${achievement.metric}`,
         `(value: ${achievement.value})`
       );
-      return BadgeService.saveBadgeToUser(userId, badgeId).catch((error: unknown) => {
+      return BadgeService.saveBadgeToUser(userId, badgeId, achievement.value).catch((error: unknown) => {
         console.error(`Failed to save badge "${badgeId}":`, error);
       });
     });

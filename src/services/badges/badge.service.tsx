@@ -73,7 +73,7 @@ export class BadgeService {
 
   }
 
-  static async saveBadgeToUser(userId: string | undefined, badgeId: string) {
+  static async saveBadgeToUser(userId: string | undefined, badgeId: string, value: number) {
     try {
       const badgeRef = doc(db, "badges", badgeId);
       const badgeSnap = await getDoc(badgeRef);
@@ -91,7 +91,7 @@ export class BadgeService {
 
       await setDoc(userBadgeRef, {
         badgeId,
-        progress: 10,
+        progress: value,
         milestones: badgeData.milestones ?? [],
         title: badgeData.title,
         type: badgeData.type,
@@ -140,9 +140,9 @@ export class BadgeService {
         distance: stats.distance,
         steps: stats.steps,
         duration: stats.duration,
-        average_pace: stats.averagePace,
+        average_pace: stats.pace,
         longest_run: stats.longestRun,
-        streak: stats.currentStreak,
+        streak: stats.streak,
         longest_streak: stats.longestStreak,
       }
 

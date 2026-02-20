@@ -95,13 +95,19 @@ export default function BadgeCard({ badge, variant = 'collection' }: { badge: Ac
     return `${kilometers} km`
   }
 
+  function formatPace(pace: number) {
+    const formattedPace = pace.toFixed(2)
+
+    return `${formattedPace} min/km`
+  }
+
   const formatterMap: Partial<
   Record<keyof AchievementStats, (value: number) => string>> = {
     duration: formatDuration,
     distance: formatDistance,
-    averagePace: (v) => `${v} min/km`,
+    pace: formatPace,
     longestRun: formatDistance,
-    currentStreak: (v) => `${v} days`,
+    streak: (v) => `${v} days`,
     longestStreak: (v) => `${v} days`,
   }
 

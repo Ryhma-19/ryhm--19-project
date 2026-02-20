@@ -65,10 +65,11 @@ export interface AchievementStats {
   distance: number; // meters
   steps: number;
   duration: number; // seconds
-  averagePace: number; // min/km
+  pace: number; // min/km
   longestRun: number; // meters
-  currentStreak: number; // days
+  streak: number; // days
   longestStreak: number; // days
+  cadence: number;
 }
 
 export type BadgeType = keyof AchievementStats
@@ -78,10 +79,11 @@ export const ICONS: Record<BadgeType, string> = {
   distance: "🏃",
   steps: "👟",
   duration: "⏱️",
-  averagePace: "⚡",
+  pace: "⚡",
   longestRun: "📏",
-  currentStreak: "🔥",
+  streak: "🔥",
   longestStreak: "🏆",
+  cadence: "👟",
 };
 
 export interface Achievement {
