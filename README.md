@@ -152,6 +152,10 @@ Your activity data syncs to the cloud automatically, but you can also manually r
 ## Project Team
 
 Built by Group 19 as a group project.
+By
+-Veikka Koskinen
+-Topias Perälä
+-Niko Alaluusua
 
 ## License
 
