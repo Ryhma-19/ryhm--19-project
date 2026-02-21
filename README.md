@@ -5,9 +5,11 @@ A React Native mobile application designed to help you track your outdoor activi
 ## Project video 
 
 - Advanced Mobile Video
+- 
 [![Video thumbnail](https://img.youtube.com/vi/VBdp5gDnmTQ/0.jpg)](https://www.youtube.com/watch?v=VBdp5gDnmTQ)
 
 - Project video (projekti esitys video)
+- 
 [![Video thumbnail](https://img.youtube.com/vi/OUYUatczlGM/0.jpg)](https://www.youtube.com/watch?v=OUYUatczlGM)
 
 ## Features
